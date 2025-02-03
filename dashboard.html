@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>GCSE Dashboard</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Shared stylesheet -->
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body class="img js-fullheight" style="background-image: url(images/bg.jpg);">
+    <section class="ftco-section">
+      <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h3 class="text-center mb-0">GCSE Exam Dates</h3>
+          <button id="logout-btn" class="btn btn-danger">Logout</button>
+        </div>
+        
+        <div style="background-color: #fff; padding: 1rem; border-radius: 0.5rem;">
+          <table class="table table-striped table-hover">
+            <thead class="thead-dark">
+              <tr>
+                <th>ID</th>
+                <th>Week</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Length</th>
+                <th>Board</th>
+                <th>Level</th>
+                <th>Exam Code</th>
+                <th>Subject</th>
+              </tr>
+            </thead>
+            <tbody id="gcse-table-body">
+              <!-- Rows populated dynamically by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <script type="module">
+      import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+      // Supabase configuration
+      const SUPABASE_URL = 'https://gpqqlgfvhincigikqchn.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdwcXFsZ2Z2aGluY2lnaWtxY2huIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg1OTI1MTYsImV4cCI6MjA1NDE2ODUxNn0.-iXyH2jzufmYSSEML1G8WyvRecNlQNJQr5Uoo9hbjLM';
+
+      // Initialize Supabase client
+      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      // Authentication check and data loading
+      document.addEventListener('DOMContentLoaded', async () => {
+        // Check authentication status
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!session) {
+          // Redirect to login if not authenticated
+          window.location.href = 'login.html';
+          return;
+        }
+
+        // Display user email (optional)
+        const userEmail = session.user.email;
+        const userDisplayElement = document.createElement('p');
+        userDisplayElement.textContent = `Logged in as: ${userEmail}`;
+        userDisplayElement.style.color = 'white';
+        userDisplayElement.style.textAlign = 'center';
+        document.querySelector('.container').prepend(userDisplayElement);
+
+        try {
+          // Fetch GCSE exam data
+          const { data: gcseData, error } = await supabase.from('gcsedata').select('*');
+          
+          if (error) {
+            console.error('Error fetching GCSE exam data:', error.message);
+            return;
+          }
+
+          // Populate table
+          const tableBody = document.getElementById('gcse-table-body');
+          let rowsHTML = gcseData.map(item => `
+            <tr>
+              <td>${item.id || ''}</td>
+              <td>${item.Week || ''}</td>
+              <td>${item.Date || ''}</td>
+              <td>${item.Time || ''}</td>
+              <td>${item.Length || ''}</td>
+              <td>${item.Board || ''}</td>
+              <td>${item.Level || ''}</td>
+              <td>${item.Exam_Code || ''}</td>
+              <td>${item.Subject || ''}</td>
+            </tr>
+          `).join('');
+
+          tableBody.innerHTML = rowsHTML;
+        } catch (err) {
+          console.error('Unexpected error:', err);
+        }
+      });
+
+      // Logout functionality
+      document.getElementById('logout-btn').addEventListener('click', async () => {
+        try {
+          const { error } = await supabase.auth.signOut();
+          
+          if (error) {
+            console.error('Logout error:', error.message);
+            return;
+          }
+
+          // Redirect to login page after logout
+          window.location.href = 'login.html';
+        } catch (err) {
+          console.error('Unexpected logout error:', err);
+        }
+      });
+    </script>
+  </body>
+</html>

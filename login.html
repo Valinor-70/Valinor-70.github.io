@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Login - GCSE Timetable Checker</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <!-- Shared stylesheet -->
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body class="img js-fullheight" style="background-image: url(images/bg.jpg);">
+    <section class="ftco-section">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-md-6 col-lg-4">
+            <div class="login-wrap p-0">
+              <h3 class="mb-4 text-center">Sign In for Your Timetable</h3>
+              <!-- Login form -->
+              <form id="login-form" class="signin-form">
+                <div class="form-group">
+                  <label for="login-email">Email</label>
+                  <input
+                    type="email"
+                    id="login-email"
+                    class="form-control"
+                    placeholder="Email"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="login-password">Password</label>
+                  <input
+                    type="password"
+                    id="login-password"
+                    class="form-control"
+                    placeholder="Password"
+                    required
+                  />
+                </div>
+                <!-- Error message area -->
+                <p id="login-error" style="color:red; font-weight:bold;"></p>
+                <div class="form-group">
+                  <button type="submit" class="form-control btn btn-primary submit px-3">
+                    Sign In
+                  </button>
+                </div>
+                <div class="form-group">
+                  <button type="button" id="sign-up" class="form-control btn btn-secondary submit px-3">
+                    Create Account
+                  </button>
+                </div>
+              </form>
+              <div class="w-100 text-center mt-3">
+                <a href="#" id="forgot-password" style="color: #fff;">Forgot Password?</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script type="module">
+      import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+      // Supabase configuration
+      const SUPABASE_URL = 'https://gpqqlgfvhincigikqchn.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdwcXFsZ2Z2aGluY2lnaWtxY2huIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg1OTI1MTYsImV4cCI6MjA1NDE2ODUxNn0.-iXyH2jzufmYSSEML1G8WyvRecNlQNJQr5Uoo9hbjLM';
+
+      // Initialize Supabase client
+      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      // Login form submission
+      document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        const errorDisplay = document.getElementById('login-error');
+        errorDisplay.textContent = '';
+
+        try {
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password
+          });
+
+          if (error) {
+            errorDisplay.textContent = `Login failed: ${error.message}`;
+            return;
+          }
+
+          // Successful login - redirect to dashboard
+          window.location.href = 'dashboard.html';
+        } catch (err) {
+          console.error('Unexpected login error:', err);
+          errorDisplay.textContent = 'An unexpected error occurred.';
+        }
+      });
+
+      // Sign Up button handler
+      document.getElementById('sign-up').addEventListener('click', async () => {
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        const errorDisplay = document.getElementById('login-error');
+        errorDisplay.textContent = '';
+
+        if (!email || !password) {
+          errorDisplay.textContent = 'Please enter both email and password';
+          return;
+        }
+
+        try {
+          const { data, error } = await supabase.auth.signUp({
+            email,
+            password
+          });
+
+          if (error) {
+            errorDisplay.textContent = `Sign up failed: ${error.message}`;
+            return;
+          }
+
+          // Successful sign up
+          errorDisplay.style.color = 'green';
+          errorDisplay.textContent = 'Account created! Please verify your email.';
+        } catch (err) {
+          console.error('Unexpected sign up error:', err);
+          errorDisplay.textContent = 'An unexpected error occurred.';
+        }
+      });
+
+      // Forgot Password handler
+      document.getElementById('forgot-password').addEventListener('click', async () => {
+        const email = document.getElementById('login-email').value;
+        const errorDisplay = document.getElementById('login-error');
+        errorDisplay.textContent = '';
+
+        if (!email) {
+          errorDisplay.textContent = 'Please enter your email first';
+          return;
+        }
+
+        try {
+          const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin + '/reset-password.html'
+          });
+
+          if (error) {
+            errorDisplay.textContent = `Password reset failed: ${error.message}`;
+            return;
+          }
+
+          // Successful password reset request
+          errorDisplay.style.color = 'green';
+          errorDisplay.textContent = 'Password reset link sent to your email.';
+        } catch (err) {
+          console.error('Unexpected password reset error:', err);
+          errorDisplay.textContent = 'An unexpected error occurred.';
+        }
+      });
+    </script>
+  </body>
+</html>
