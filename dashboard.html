@@ -4,7 +4,6 @@
     <title>GCSE Dashboard</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- Shared stylesheet -->
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body class="img js-fullheight" style="background-image: url(images/bg.jpg);">
@@ -24,6 +23,8 @@
                 <th>Time</th>
                 <th>Length</th>
                 <th>Board</th>
+                <th>Level</th>
+                <th>Exam Code</th>
                 <th>Subject</th>
               </tr>
             </thead>
@@ -36,11 +37,11 @@
     </section>
 
     <script type="module">
-      import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+      import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
       // Supabase configuration
       const SUPABASE_URL = 'https://gpqqlgfvhincigikqchn.supabase.co';
-      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdwcXFsZ2Z2aGluY2lnaWtxY2huIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg1OTI1MTYsImV4cCI6MjA1NDE2ODUxNn0.-iXyH2jzufmYSSEML1G8WyvRecNlQNJQr5Uoo9hbjLM';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdwcXFsZ2Z2aGluY2lnaWtxY2huIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg1OTI1MTYsImV4cCI6MjA1NDE2ODUxNn0.-iXyH2jzufmYSSEML1G8WyvRecNlQNJQr5Uoo9hbjLM'; // Replace with your actual Supabase anon key
 
       // Initialize Supabase client
       const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -51,38 +52,48 @@
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
-          // Redirect to login if not authenticated
           window.location.href = 'login.html';
           return;
         }
 
-        // Display user email (optional)
-        const userEmail = session.user.email;
-        const userDisplayElement = document.createElement('p');
-        userDisplayElement.textContent = `Logged in as: ${userEmail}`;
-        userDisplayElement.style.color = 'white';
-        userDisplayElement.style.textAlign = 'center';
-        document.querySelector('.container').prepend(userDisplayElement);
+        const userId = session.user.id;
 
         try {
-          // Fetch GCSE exam data
-          const { data: gcseData, error } = await supabase.from('gcsedata').select('Week,Date,Time,Length,Board,Subject');
-          
-          if (error) {
-            console.error('Error fetching GCSE exam data:', error.message);
+          // Fetch user exams
+          const { data: userExams, error: userExamsError } = await supabase
+            .from('user_exams')
+            .select('exam_id')
+            .eq('user_id', userId);
+
+          if (userExamsError) {
+            console.error('Error fetching user exams:', userExamsError.message);
+            return;
+          }
+
+          // Fetch exam details for each exam_id
+          const examIds = userExams.map(ue => ue.exam_id);
+          const { data: exams, error: examsError } = await supabase
+            .from('gcsedata')
+            .select('*')
+            .in('id', examIds);
+
+          if (examsError) {
+            console.error('Error fetching exams:', examsError.message);
             return;
           }
 
           // Populate table
           const tableBody = document.getElementById('gcse-table-body');
-          let rowsHTML = gcseData.map(item => `
+          let rowsHTML = exams.map(item => `
             <tr>
-              <td>${item.Week || ''}</td>
-              <td>${item.Date || ''}</td>
-              <td>${item.Time || ''}</td>
-              <td>${item.Length || ''}</td>
-              <td>${item.Board || ''}</td>
-              <td>${item.Subject || ''}</td>
+              <td>${item.week || ''}</td>
+              <td>${item.exam_date || ''}</td>
+              <td>${item.exam_time || ''}</td>
+              <td>${item.length || ''}</td>
+              <td>${item.board || ''}</td>
+              <td>${item.level || ''}</td>
+              <td>${item.exam_code || ''}</td>
+              <td>${item.subject || ''}</td>
             </tr>
           `).join('');
 
@@ -102,7 +113,6 @@
             return;
           }
 
-          // Redirect to login page after logout
           window.location.href = 'login.html';
         } catch (err) {
           console.error('Unexpected logout error:', err);
