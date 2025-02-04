@@ -8364,3 +8364,35 @@ textarea.form-control {
   padding: 0.75rem 1.5rem;
   font-size: 1.1rem;
 }
+.exam-filters {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.exam-filters input {
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #000 !important;
+}
+
+.exam-filters input::placeholder {
+  color: rgba(0, 0, 0, 0.5) !important;
+}
+
+.exam-option {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 1rem;
+  transition: all 0.3s ease;
+}
+
+.exam-option:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+}
+
+.exam-details {
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+}

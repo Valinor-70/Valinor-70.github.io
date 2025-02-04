@@ -14,48 +14,30 @@
             <div class="login-wrap p-0">
               <h3 class="mb-4 text-center">Sign In for Your Timetable</h3>
               
-              <!-- Login form -->
               <form id="login-form" class="signin-form">
                 <div class="form-group">
                   <label for="login-email">Email</label>
-                  <input
-                    type="email"
-                    id="login-email"
-                    class="form-control"
-                    placeholder="Email"
-                    required
-                  />
+                  <input type="email" id="login-email" class="form-control" required />
                 </div>
                 <div class="form-group">
                   <label for="login-password">Password</label>
-                  <input
-                    type="password"
-                    id="login-password"
-                    class="form-control"
-                    placeholder="Password"
-                    required
-                  />
+                  <input type="password" id="login-password" class="form-control" required />
                 </div>
                 
-                <!-- Error/Success message area -->
                 <div id="message-container" class="mb-3">
                   <p id="login-error" class="error-message"></p>
                   <p id="success-message" class="success-message"></p>
                 </div>
 
                 <div class="form-group">
-                  <button type="submit" id="sign-in-btn" class="form-control btn btn-primary submit px-3">
-                    Sign In
-                  </button>
+                  <button type="submit" id="sign-in-btn" class="form-control btn btn-primary">Sign In</button>
                 </div>
                 <div class="form-group">
-                  <button type="button" id="sign-up-btn" class="form-control btn btn-secondary px-3">
-                    Create Account
-                  </button>
+                  <button type="button" id="sign-up-btn" class="form-control btn btn-secondary">Create Account</button>
                 </div>
               </form>
 
-              <div class="w-100 text-center mt-3">
+              <div class="text-center mt-3">
                 <a href="#" id="forgot-password">Forgot Password?</a>
               </div>
             </div>
@@ -67,110 +49,92 @@
     <script type="module">
       import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
 
-      // Supabase configuration
       const SUPABASE_URL = 'https://rcrsslbqoukogbvdvwrz.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjcnNzbGJxb3Vrb2didmR2d3J6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2OTM5MTUsImV4cCI6MjA1NDI2OTkxNX0.11uWp9T-q2Zw2qcj19Z6ahmXc_aXTf0oUZsdIKkW_dQ';
 
-      // Initialize Supabase client
-      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-        auth: {
-          autoRefreshToken: true,
-          persistSession: true,
-          detectSessionInUrl: true,
-          storage: window.localStorage
+      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      function showMessage(message, isError = true) {
+        const errorEl = document.getElementById('login-error');
+        const successEl = document.getElementById('success-message');
+        
+        if (isError) {
+          errorEl.textContent = message;
+          errorEl.style.display = 'block';
+          successEl.style.display = 'none';
+        } else {
+          successEl.textContent = message;
+          successEl.style.display = 'block';
+          errorEl.style.display = 'none';
         }
-      });
-
-      // Helper functions for UI messages
-      const showError = (message) => {
-        const errorElement = document.getElementById('login-error');
-        const successElement = document.getElementById('success-message');
-        errorElement.textContent = message;
-        errorElement.style.display = 'block';
-        successElement.style.display = 'none';
-      };
-
-      const showSuccess = (message) => {
-        const errorElement = document.getElementById('login-error');
-        const successElement = document.getElementById('success-message');
-        successElement.textContent = message;
-        successElement.style.display = 'block';
-        errorElement.style.display = 'none';
-      };
+      }
 
       // Check existing session
-      const checkExistingSession = async () => {
+      const checkSession = async () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
-          window.location.href = `${window.location.origin}/dashboard.html`;
+          window.location.href = 'dashboard.html';
         }
       };
 
-      // Sign In handler
+      // Handle form submission
       document.getElementById('login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const email = document.getElementById('login-email').value;
+        const email = document.getElementById('login-email').value.trim();
         const password = document.getElementById('login-password').value;
-        const signInButton = document.getElementById('sign-in-btn');
+        const signInBtn = document.getElementById('sign-in-btn');
 
         try {
-          signInButton.disabled = true;
-          signInButton.classList.add('loading');
+          signInBtn.disabled = true;
+          signInBtn.textContent = 'Signing in...';
 
-          const { data, error } = await supabase.auth.signInWithPassword({
-            email: email.trim(),
-            password: password
-          });
-
+          const { error } = await supabase.auth.signInWithPassword({ email, password });
+          
           if (error) throw error;
-
-          window.location.href = `${window.location.origin}/dashboard.html`;
+          window.location.href = 'dashboard.html';
         } catch (err) {
-          showError(err.message);
-          console.error('Login error:', err);
+          showMessage(err.message);
         } finally {
-          signInButton.disabled = false;
-          signInButton.classList.remove('loading');
+          signInBtn.disabled = false;
+          signInBtn.textContent = 'Sign In';
         }
       });
 
-      // Sign Up handler
+      // Handle sign up
       document.getElementById('sign-up-btn').addEventListener('click', async () => {
-        const email = document.getElementById('login-email').value;
+        const email = document.getElementById('login-email').value.trim();
         const password = document.getElementById('login-password').value;
-        const signUpButton = document.getElementById('sign-up-btn');
+        const signUpBtn = document.getElementById('sign-up-btn');
 
         try {
-          signUpButton.disabled = true;
-          signUpButton.classList.add('loading');
+          signUpBtn.disabled = true;
+          signUpBtn.textContent = 'Creating account...';
 
-          const { data, error } = await supabase.auth.signUp({
-            email: email.trim(),
-            password: password,
+          const { error } = await supabase.auth.signUp({
+            email,
+            password,
             options: {
               emailRedirectTo: `${window.location.origin}/select-exams.html`
             }
           });
 
           if (error) throw error;
-
-          showSuccess('Account created! Please check your email to verify your account.');
+          showMessage('Please check your email to confirm your account', false);
         } catch (err) {
-          showError(err.message);
-          console.error('Sign up error:', err);
+          showMessage(err.message);
         } finally {
-          signUpButton.disabled = false;
-          signUpButton.classList.remove('loading');
+          signUpBtn.disabled = false;
+          signUpBtn.textContent = 'Create Account';
         }
       });
 
-      // Password Reset handler
+      // Handle password reset
       document.getElementById('forgot-password').addEventListener('click', async (e) => {
         e.preventDefault();
-        const email = document.getElementById('login-email').value;
+        const email = document.getElementById('login-email').value.trim();
 
         if (!email) {
-          showError('Please enter your email address');
+          showMessage('Please enter your email address');
           return;
         }
 
@@ -180,23 +144,14 @@
           });
 
           if (error) throw error;
-
-          showSuccess('Password reset instructions have been sent to your email.');
+          showMessage('Password reset instructions sent to your email', false);
         } catch (err) {
-          showError(err.message);
-          console.error('Password reset error:', err);
+          showMessage(err.message);
         }
       });
 
-      // Initialize
-      document.addEventListener('DOMContentLoaded', checkExistingSession);
-
-      // Auth state change handler
-      supabase.auth.onAuthStateChange((event, session) => {
-        if (event === 'SIGNED_IN') {
-          window.location.href = `${window.location.origin}/dashboard.html`;
-        }
-      });
+      // Check session on load
+      document.addEventListener('DOMContentLoaded', checkSession);
     </script>
   </body>
 </html>

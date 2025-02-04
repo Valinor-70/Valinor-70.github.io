@@ -1,25 +1,87 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <title>Select Your Exams - GCSE Timetable</title>
+    <title>Select Your GCSE Exams</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css" />
+    <style>
+      .exam-card {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+        transition: transform 0.2s;
+      }
+      .exam-card:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.15);
+      }
+      .search-box {
+        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 20px;
+      }
+      .exam-checkbox {
+        width: 20px;
+        height: 20px;
+      }
+      .loading {
+        opacity: 0.7;
+        pointer-events: none;
+      }
+    </style>
   </head>
   <body class="img js-fullheight" style="background-image: url(images/bg.jpg);">
     <section class="ftco-section">
       <div class="container">
         <div class="row justify-content-center">
-          <div class="col-md-8">
-            <div class="login-wrap p-0">
-              <h3 class="mb-4 text-center">Select Your Exams</h3>
-              <div class="exam-selection p-4" style="background: rgba(255,255,255,0.1); border-radius: 10px;">
-                <div id="exam-list" class="row">
-                  <!-- Exams will be populated here -->
+          <div class="col-md-10">
+            <div class="p-4" style="background: rgba(0, 0, 0, 0.7); border-radius: 15px;">
+              <h2 class="text-center text-white mb-4">Select Your GCSE Exams</h2>
+              
+              <!-- Search Filters -->
+              <div class="row mb-4">
+                <div class="col-md-6 mb-3">
+                  <input 
+                    type="text" 
+                    id="subject-search" 
+                    class="form-control search-box" 
+                    placeholder="Search by subject..."
+                  />
                 </div>
-                <div class="text-center mt-4">
-                  <button id="save-exams" class="btn btn-primary px-5">Save My Exams</button>
+                <div class="col-md-6 mb-3">
+                  <input 
+                    type="text" 
+                    id="board-search" 
+                    class="form-control search-box" 
+                    placeholder="Search by exam board..."
+                  />
                 </div>
+              </div>
+
+              <!-- Exam List Container -->
+              <div id="exam-list" class="row">
+                <!-- Exams will be loaded here -->
+              </div>
+
+              <!-- Loading Message -->
+              <div id="loading-message" class="text-center text-white my-4" style="display: none;">
+                Loading exams...
+              </div>
+
+              <!-- No Results Message -->
+              <div id="no-results" class="text-center text-white my-4" style="display: none;">
+                No exams found matching your search.
+              </div>
+
+              <!-- Buttons -->
+              <div class="text-center mt-4">
+                <button id="save-button" class="btn btn-primary px-4 me-2">Save Selections</button>
+                <a href="dashboard.html" class="btn btn-secondary px-4">Cancel</a>
               </div>
             </div>
           </div>
@@ -27,99 +89,186 @@
       </div>
     </section>
 
-    <script src="js/jquery.min.js"></script>
-    <script src="js/popper.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    
     <script type="module">
       import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
 
       const SUPABASE_URL = 'https://rcrsslbqoukogbvdvwrz.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjcnNzbGJxb3Vrb2didmR2d3J6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2OTM5MTUsImV4cCI6MjA1NDI2OTkxNX0.11uWp9T-q2Zw2qcj19Z6ahmXc_aXTf0oUZsdIKkW_dQ';
-      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-      // Check if user is authenticated
-      const checkAuth = async () => {
+      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      let allExams = [];
+      let currentSession = null;
+
+      // Format date for display
+      function formatDate(dateStr) {
+        if (!dateStr) return 'TBC';
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        });
+      }
+
+      // Format time for display
+      function formatTime(timeStr) {
+        return timeStr || 'TBC';
+      }
+
+      // Show loading state
+      function showLoading(show) {
+        document.getElementById('loading-message').style.display = show ? 'block' : 'none';
+        document.getElementById('exam-list').style.display = show ? 'none' : 'flex';
+      }
+
+      // Check authentication
+      async function checkAuth() {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
           window.location.href = 'login.html';
+          return null;
         }
+        currentSession = session;
         return session;
-      };
+      }
 
-      // Load all available exams
-      const loadExams = async () => {
-        const { data: exams, error } = await supabase
-          .from('gcsedata')
-          .select('id, Subject, Board, Date')
-          .order('Date', { ascending: true });
+      // Load and display exams
+      async function loadExams() {
+        try {
+          showLoading(true);
 
-        if (error) {
-          console.error('Error loading exams:', error);
+          // Get all exams
+          const { data: exams, error: examsError } = await supabase
+            .from('gcsedata')
+            .select('*')
+            .order('Date', { ascending: true });
+
+          if (examsError) throw examsError;
+
+          // Get user's existing selections
+          const { data: userExams, error: userExamsError } = await supabase
+            .from('user_exams')
+            .select('exam_id')
+            .eq('user_id', currentSession.user.id);
+
+          if (userExamsError) throw userExamsError;
+
+          allExams = exams;
+          const excludedExamIds = userExams?.map(ue => ue.exam_id) || [];
+          filterAndDisplayExams(excludedExamIds);
+
+        } catch (err) {
+          console.error('Error loading exams:', err);
+          alert('Failed to load exams. Please try again.');
+        } finally {
+          showLoading(false);
+        }
+      }
+
+      // Filter and display exams
+      function filterAndDisplayExams(excludedExamIds = []) {
+        const subjectSearch = document.getElementById('subject-search').value.toLowerCase();
+        const boardSearch = document.getElementById('board-search').value.toLowerCase();
+
+        const filteredExams = allExams.filter(exam => 
+          exam.Subject?.toLowerCase().includes(subjectSearch) &&
+          exam.Board?.toLowerCase().includes(boardSearch)
+        );
+
+        const examList = document.getElementById('exam-list');
+        const noResults = document.getElementById('no-results');
+
+        if (filteredExams.length === 0) {
+          examList.style.display = 'none';
+          noResults.style.display = 'block';
           return;
         }
 
-        const examList = document.getElementById('exam-list');
-        examList.innerHTML = exams.map(exam => `
+        noResults.style.display = 'none';
+        examList.style.display = 'flex';
+        examList.innerHTML = filteredExams.map(exam => `
           <div class="col-md-6 mb-3">
-            <div class="exam-option">
-              <label class="checkbox-wrap w-100">
-                <input type="checkbox" value="${exam.id}" class="exam-checkbox">
-                <span class="checkmark"></span>
-                <div class="exam-details">
-                  <strong>${exam.Subject}</strong><br>
-                  ${exam.Board} - ${new Date(exam.Date).toLocaleDateString()}
-                </div>
-              </label>
+            <div class="exam-card">
+              <div class="form-check">
+                <input class="form-check-input exam-checkbox" 
+                       type="checkbox" 
+                       value="${exam.id}"
+                       id="exam-${exam.id}"
+                       ${!excludedExamIds.includes(exam.id) ? 'checked' : ''}>
+                <label class="form-check-label text-white" for="exam-${exam.id}">
+                  <strong class="d-block">${exam.Subject}</strong>
+                  <span class="d-block text-light">${exam.Board}</span>
+                  <small class="d-block text-light">
+                    Date: ${formatDate(exam.Date)}<br>
+                    Time: ${formatTime(exam.Time)}<br>
+                    Length: ${exam.Length || 'TBC'}
+                  </small>
+                </label>
+              </div>
             </div>
           </div>
         `).join('');
-      };
+      }
 
-      // Save selected exams
-      const saveExams = async (session) => {
+      // Save exam selections
+      async function saveSelections() {
+        const saveButton = document.getElementById('save-button');
         const selectedExams = Array.from(document.querySelectorAll('.exam-checkbox:checked'))
-          .map(checkbox => checkbox.value);
+          .map(cb => parseInt(cb.value));
 
         if (selectedExams.length === 0) {
           alert('Please select at least one exam');
           return;
         }
 
-        // Get all exam IDs
-        const { data: allExams } = await supabase
-          .from('gcsedata')
-          .select('id');
+        try {
+          saveButton.disabled = true;
+          saveButton.textContent = 'Saving...';
 
-        // Create records for exams NOT selected
-        const notSelectedExams = allExams
-          .filter(exam => !selectedExams.includes(exam.id.toString()))
-          .map(exam => ({
-            user_id: session.user.id,
-            exam_id: exam.id
-          }));
+          // Delete existing selections
+          const { error: deleteError } = await supabase
+            .from('user_exams')
+            .delete()
+            .eq('user_id', currentSession.user.id);
 
-        const { error } = await supabase
-          .from('user_exams')
-          .insert(notSelectedExams);
+          if (deleteError) throw deleteError;
 
-        if (error) {
-          console.error('Error saving exam selections:', error);
-          alert('Error saving your exam selections. Please try again.');
-          return;
+          // Insert records for non-selected exams
+          const notSelectedExams = allExams
+            .filter(exam => !selectedExams.includes(exam.id))
+            .map(exam => ({
+              user_id: currentSession.user.id,
+              exam_id: exam.id
+            }));
+
+          if (notSelectedExams.length > 0) {
+            const { error: insertError } = await supabase
+              .from('user_exams')
+              .insert(notSelectedExams);
+
+            if (insertError) throw insertError;
+          }
+
+          window.location.href = 'dashboard.html';
+        } catch (err) {
+          console.error('Error saving selections:', err);
+          alert('Failed to save selections. Please try again.');
+          saveButton.disabled = false;
+          saveButton.textContent = 'Save Selections';
         }
-
-        window.location.href = 'dashboard.html';
-      };
+      }
 
       // Initialize page
       document.addEventListener('DOMContentLoaded', async () => {
         const session = await checkAuth();
+        if (!session) return;
+
         await loadExams();
 
-        document.getElementById('save-exams').addEventListener('click', () => {
-          saveExams(session);
-        });
+        // Add event listeners
+        document.getElementById('subject-search').addEventListener('input', () => filterAndDisplayExams());
+        document.getElementById('board-search').addEventListener('input', () => filterAndDisplayExams());
+        document.getElementById('save-button').addEventListener('click', saveSelections);
       });
     </script>
   </body>
