@@ -1,0 +1,44 @@
+id,Week,Date,Time,Length,Board,Level,Exam_Code,Subject
+1,1,08/05/25,am,1hr 45,AQA,GCSE,8261/W,Drama (Written Component)
+2,1,08/05/25,pm,2hrs 05,Pearson Edexcel I,GCSE,4GN0/01 & 02,German: Listening followed by reading & writing
+3,1,09/05/25,am,2 hrs,CIE,IGCSE,0977/12,History Paper 1
+4,1,09/05/25,pm,1hr 15,WJEC,GCSE,C480UB0-1,Geology - Component 1: Geological Principles (On screen)
+5,2,12/05/25,am,2 hrs,Pearson Edexcel I,GCSE,4ET1/01,English Literature: Poetry & modern prose
+6,2,12/05/25,pm,1hr 30,OCR,GCSE,J277/01,Computer Science: Computer Systems
+7,2,13/05/25,am,1hr 45,AQA,GCSE,8062/13 & 15,Religious Studies A (full course): Christianity & Islam
+8,2,13/05/25,pm,1hr 45,AQA,GCSE,8461/1F//H,Biology Paper 1
+9,2,13/05/25,pm,1hr 15,AQA,GCSE,8464/B/1F/1H,"Combined Science: Trilogy, Biology"
+10,2,14/05/25,am,1hr 45,WJEC,GCSE,C112U10-1,Geography - Unit 1: Investigating Geographical Issues
+11,2,15/05/25,am,2hrs,Pearson Edexcel I,GCSE,4MA1/1F &1H,Mathematics: Paper 1
+12,2,16/05/25,am,1hr 45,CIE,IGCSE,0977/22,History Paper 2
+13,3,19/05/25,am,1h 45,AQA,GCSE,8462/1F/1H,Chemistry Paper
+14,3,19/05/25,am,1hr 15,AQA,GCSE,8464/C/1F/1H,Combined Science: Trilogy - Chemistry Paper 1
+15,3,19/05/25,am,1 hr,CIE,IGCSE,0977/42,History - Alternative to CWK
+16,3,19/05/25,pm,1hr 15,AQA,GCSE,8582/1,Physical Education Paper 1
+17,3,20/05/25,am,1hr 30,Pearson Edexcel I,GCSE,4ET1/02,English Literature: Modern Drama & Literary Heritage Texts
+18,3,20/05/25,pm,1hr 30,OCR,GCSE,J277/02,"Computer Science: Computational thinking, algorithms & programming"
+19,3,21/05/25,am,2hrs 05,Pearson Edexcel iGCSE,GCSE,4FR0/01 & 02,French: Listening followed by reading & writing
+20,3,21/05/25,pm,1h45,AQA,GCSE,8061/2 3 & 5,"Religious Studies (short course): Christianity, Islam & Themes"
+21,3,21/05/25,pm,1h45,AQA,GCSE,8062/2A,Religious Studies A (full course): Paper 2
+22,3,21/05/25,pm,1hr 30,WJEC,GCSE,C480U20-1,Geology - Component 2: Investigative Geology
+23,3,22/05/25,am,1hr 45,AQA,GCSE,8463/1F/1H,Physics Paper 1
+24,3,22/05/25,am,1hr 15,AQA,GCSE,8464/P/1F/1H,Combined Science: Trilogy - Physics paper 1
+25,3,23/05/25,am,2hrs 15,Pearson Edexcel I,GCSE,4EA1/01,English language: Paper 1
+26,4,04/06/25,am,2hrs,Pearson Edexcel I,GCSE,4MA1/2F & 2H,Mathematics: Paper 2
+27,4,06/06/25,am,1hr 30,Pearson Edexcel I,GCSE,4EA1/02,English Language: Paper 2
+28,4,06/06/25,pm,1hr 30,WJEC,GCSE,C112U20-1,Geography - Unit 2: Problem Solving Geography
+29,5,09/06/25,am,1h 45,AQA,GCSE,8461/2F/2H,Biology Paper 2
+30,5,09/06/25,am,1hr 15,AQA,GCSE,8465/B/2F/2H,Combined Science: Trilogy - biology paper 2
+31,5,09/06/25,pm,1h 15,AQA,GCSE,8582/2,Physical Education Paper 2
+32,5,10/06/25,am,2hrs 05,Pearson Edexcel I,GCSE,4SP1/01 & 02,Spanish: Listening followed by reading & writing
+33,5,11/06/25,PM,NA,JCQ,NA,NA,Contingency Session - candidates must be available to sit exams if required
+34,5,12/06/25,am,1hr 30,WJEC,GCSE,C112U30-1,Geography - Unit 3: Applied Fieldwork
+35,5,12/06/25,pm,1 hr 45,AQA,Level 2,8365/1,Certificate in Further Maths Paper 1
+36,5,13/06/25,am,1hr 45,AQA,GCSE,8462/2F/2H,Chemistry Paper 2
+37,5,13/06/25,am,1hr 15,AQA,GCSE,8464/C/2F/2H,Combined Science: Trilogy - Chemistry Paper 2
+38,6,16/06/25,am,1hr 45,AQA,GCSE,8463/2F/2H,Physics Paper 2
+39,6,16/06/25,am,1hr 15,AQA,GCSE,8464/P/2F/2H,Combined Science: Trilogy - Physics Paper 2
+40,6,16/06/25,pm,1hr 15,WJEC,GCSE,C660U30-1,Music - Component 3: Appraising
+41,6,18/06/25,am,2hrs,WJEC,GCSE,C600U10-1,Deign & Technology: Design & Technology in the 21st century
+42,6,18/06/25,pm,1hr 30,AQA,Level 2,8365/2,Certificate in Further Maths Paper 2
+43,7,25/06/25,All day,NA,JCQ,NA,NA,Contingency Session - candidates must be available to sit exams if required
