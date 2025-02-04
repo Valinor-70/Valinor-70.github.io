@@ -11,11 +11,20 @@
       <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-4">
           <h3 class="text-center mb-0">GCSE Exam Dates</h3>
-          <button id="logout-btn" class="btn btn-danger">Logout</button>
+          <div class="button-group">
+            <button id="select-exams-btn" class="btn btn-primary me-2" style="display: none;">Select My Exams</button>
+            <button id="logout-btn" class="btn btn-danger">Logout</button>
+          </div>
         </div>
         
-        <div style="background-color: #fff; padding: 1rem; border-radius: 0.5rem;">
-          <table class="table table-striped table-hover">
+        <div id="exam-container" style="background-color: #fff; padding: 1rem; border-radius: 0.5rem;">
+          <div id="no-exams-message" class="text-center p-5" style="display: none;">
+            <h4>No exams selected yet!</h4>
+            <p class="mb-4">Please select the exams you're taking to see your schedule.</p>
+            <button id="select-exams-btn-main" class="btn btn-primary btn-lg">Select My Exams</button>
+          </div>
+          
+          <table id="exam-table" class="table table-striped table-hover" style="display: none;">
             <thead class="thead-dark">
               <tr>
                 <th>Week</th>
@@ -37,16 +46,13 @@
     <script type="module">
       import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-      // Supabase configuration
       const SUPABASE_URL = 'https://rcrsslbqoukogbvdvwrz.supabase.co';
-      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjcnNzbGJxb3Vrb2didmR2d3J6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2OTM5MTUsImV4cCI6MjA1NDI2OTkxNX0.11uWp9T-q2Zw2qcj19Z6ahmXc_aXTf0oUZsdIKkW_dQ'; // Replace with your actual Supabase anon key
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjcnNzbGJxb3Vrb2didmR2d3J6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2OTM5MTUsImV4cCI6MjA1NDI2OTkxNX0.11uWp9T-q2Zw2qcj19Z6ahmXc_aXTf0oUZsdIKkW_dQ';
 
-      // Initialize Supabase client
       const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
       // Authentication check and data loading
       document.addEventListener('DOMContentLoaded', async () => {
-        // Check authentication status
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
@@ -55,9 +61,12 @@
         }
 
         const userId = session.user.id;
+        await loadUserExams(userId);
+      });
 
+      async function loadUserExams(userId) {
         try {
-          // Fetch user exams
+          // Fetch user exams (the ones they DON'T take)
           const { data: userExams, error: userExamsError } = await supabase
             .from('user_exams')
             .select('exam_id')
@@ -68,34 +77,62 @@
             return;
           }
 
-          // Fetch exam details for each exam_id
-          const examIds = userExams.map(ue => ue.exam_id);
+          // Get all exam IDs that user doesn't take
+          const excludedExamIds = userExams.map(ue => ue.exam_id);
+
+          // Fetch all exams except those in excludedExamIds
           const { data: exams, error: examsError } = await supabase
             .from('gcsedata')
-            .select('Week,Date,Time,Length,Board,Subject')
-            .in('id', examIds);
+            .select('*')
+            .order('Date', { ascending: true });
 
           if (examsError) {
             console.error('Error fetching exams:', examsError.message);
             return;
           }
 
-          // Populate table
-          const tableBody = document.getElementById('gcse-table-body');
-          let rowsHTML = exams.map(item => `
-            <tr>
-              <td>${item.Week || ''}</td> 
-              <td>${item.Date || ''}</td>
-              <td>${item.Time || ''}</td>
-              <td>${item.Length || ''}</td>
-              <td>${item.Board || ''}</td>
-              <td>${item.Subject || ''}</td>
-            </tr>
-          `).join('');
+          // Filter out the exams user doesn't take
+          const userActiveExams = exams.filter(exam => !excludedExamIds.includes(exam.id));
 
-          tableBody.innerHTML = rowsHTML;
+          // Show/hide appropriate elements based on whether user has any exams
+          const examTable = document.getElementById('exam-table');
+          const noExamsMessage = document.getElementById('no-exams-message');
+          const selectExamsBtn = document.getElementById('select-exams-btn');
+
+          if (userActiveExams.length === 0) {
+            examTable.style.display = 'none';
+            noExamsMessage.style.display = 'block';
+            selectExamsBtn.style.display = 'none';
+          } else {
+            examTable.style.display = 'table';
+            noExamsMessage.style.display = 'none';
+            selectExamsBtn.style.display = 'inline-block';
+            
+            // Populate table
+            const tableBody = document.getElementById('gcse-table-body');
+            tableBody.innerHTML = userActiveExams.map(exam => `
+              <tr>
+                <td>${exam.Week || ''}</td>
+                <td>${exam.Date ? new Date(exam.Date).toLocaleDateString() : ''}</td>
+                <td>${exam.Time || ''}</td>
+                <td>${exam.Length || ''}</td>
+                <td>${exam.Board || ''}</td>
+                <td>${exam.Subject || ''}</td>
+              </tr>
+            `).join('');
+          }
         } catch (err) {
           console.error('Unexpected error:', err);
+        }
+      }
+
+      // Add event listeners for buttons
+      ['select-exams-btn', 'select-exams-btn-main'].forEach(btnId => {
+        const btn = document.getElementById(btnId);
+        if (btn) {
+          btn.addEventListener('click', () => {
+            window.location.href = 'select-exams.html';
+          });
         }
       });
 
