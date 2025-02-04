@@ -4,7 +4,6 @@
     <title>Login - GCSE Timetable Checker</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <!-- Shared stylesheet -->
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body class="img js-fullheight" style="background-image: url(images/bg.jpg);">
@@ -14,6 +13,7 @@
           <div class="col-md-6 col-lg-4">
             <div class="login-wrap p-0">
               <h3 class="mb-4 text-center">Sign In for Your Timetable</h3>
+              
               <!-- Login form -->
               <form id="login-form" class="signin-form">
                 <div class="form-group">
@@ -36,21 +36,27 @@
                     required
                   />
                 </div>
-                <!-- Error message area -->
-                <p id="login-error" style="color:red; font-weight:bold;"></p>
+                
+                <!-- Error/Success message area -->
+                <div id="message-container" class="mb-3">
+                  <p id="login-error" class="error-message" style="display: none;"></p>
+                  <p id="success-message" class="success-message" style="display: none;"></p>
+                </div>
+
                 <div class="form-group">
-                  <button type="submit" class="form-control btn btn-primary submit px-3">
+                  <button type="submit" id="sign-in-btn" class="form-control btn btn-primary submit px-3">
                     Sign In
                   </button>
                 </div>
                 <div class="form-group">
-                  <button type="button" id="sign-up" class="form-control btn btn-secondary submit px-3">
+                  <button type="button" id="sign-up-btn" class="form-control btn btn-secondary px-3">
                     Create Account
                   </button>
                 </div>
               </form>
+
               <div class="w-100 text-center mt-3">
-                <a href="#" id="forgot-password" style="color: #fff;">Forgot Password?</a>
+                <a href="#" id="forgot-password" style="color: #fff">Forgot Password?</a>
               </div>
             </div>
           </div>
@@ -62,98 +68,160 @@
       import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
 
       // Supabase configuration
-      const SUPABASE_URL = https://rcrsslbqoukogbvdvwrz.supabase.co';
-      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjcnNzbGJxb3Vrb2didmR2d3J6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2OTM5MTUsImV4cCI6MjA1NDI2OTkxNX0.11uWp9T-q2Zw2qcj19Z6ahmXc_aXTf0oUZsdIKkW_dQ
+      const SUPABASE_URL = 'https://rcrsslbqoukogbvdvwrz.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjcnNzbGJxb3Vrb2didmR2d3J6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2OTM5MTUsImV4cCI6MjA1NDI2OTkxNX0.11[...]';
 
-      // Initialize Supabase client
-      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      // Get the current domain
+      const BASE_URL = window.location.origin;
 
-      // Login form submission
+      // Initialize Supabase client with dynamic redirect configuration
+      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: {
+          autoRefreshToken: true,
+          persistSession: true,
+          detectSessionInUrl: true,
+          flowType: 'pkce',
+          redirectTo: `${BASE_URL}/select-exams.html`
+        }
+      });
+
+      // Helper functions for UI messages
+      const showError = (message) => {
+        const errorElement = document.getElementById('login-error');
+        const successElement = document.getElementById('success-message');
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+        successElement.style.display = 'none';
+      };
+
+      const showSuccess = (message) => {
+        const errorElement = document.getElementById('login-error');
+        const successElement = document.getElementById('success-message');
+        successElement.textContent = message;
+        successElement.style.display = 'block';
+        errorElement.style.display = 'none';
+      };
+
+      // Check if user is already authenticated
+      const checkExistingSession = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          window.location.href = `${BASE_URL}/dashboard.html`;
+        }
+      };
+
+      // Sign In handler
       document.getElementById('login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('login-email').value;
         const password = document.getElementById('login-password').value;
-        const errorDisplay = document.getElementById('login-error');
-        errorDisplay.textContent = '';
 
         try {
+          const signInButton = document.getElementById('sign-in-btn');
+          signInButton.classList.add('loading');
+          signInButton.disabled = true;
+
           const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password
           });
 
           if (error) {
-            errorDisplay.textContent = `Login failed: ${error.message}`;
+            showError(`Login failed: ${error.message}`);
             return;
           }
 
-          // Successful login - redirect to dashboard
-          window.location.href = 'dashboard.html';
+          // Successful login
+          window.location.href = `${BASE_URL}/dashboard.html`;
         } catch (err) {
-          console.error('Unexpected login error:', err);
-          errorDisplay.textContent = 'An unexpected error occurred.';
+          showError('An unexpected error occurred. Please try again.');
+          console.error('Login error:', err);
+        } finally {
+          const signInButton = document.getElementById('sign-in-btn');
+          signInButton.classList.remove('loading');
+          signInButton.disabled = false;
         }
       });
 
-      // Sign Up button handler
-      document.getElementById('sign-up').addEventListener('click', async () => {
+      // Sign Up handler
+      document.getElementById('sign-up-btn').addEventListener('click', async () => {
         const email = document.getElementById('login-email').value;
         const password = document.getElementById('login-password').value;
-        const errorDisplay = document.getElementById('login-error');
-        errorDisplay.textContent = '';
 
         if (!email || !password) {
-          errorDisplay.textContent = 'Please enter both email and password';
+          showError('Please enter both email and password');
           return;
         }
 
         try {
+          const signUpButton = document.getElementById('sign-up-btn');
+          signUpButton.classList.add('loading');
+          signUpButton.disabled = true;
+
           const { data, error } = await supabase.auth.signUp({
             email,
-            password
+            password,
+            options: {
+              emailRedirectTo: `${BASE_URL}/select-exams.html`,
+              data: {
+                created_at: new Date().toISOString()
+              }
+            }
           });
 
           if (error) {
-            errorDisplay.textContent = `Sign up failed: ${error.message}`;
+            showError(`Sign up failed: ${error.message}`);
             return;
           }
 
-          // Successful sign up
-          errorDisplay.style.color = 'green';
-          errorDisplay.textContent = 'Account created! Please verify your email.';
+          showSuccess('Account created! Please check your email to verify your account.');
         } catch (err) {
-          console.error('Unexpected sign up error:', err);
-          errorDisplay.textContent = 'An unexpected error occurred.';
+          showError('An unexpected error occurred. Please try again.');
+          console.error('Sign up error:', err);
+        } finally {
+          const signUpButton = document.getElementById('sign-up-btn');
+          signUpButton.classList.remove('loading');
+          signUpButton.disabled = false;
         }
       });
 
-      // Forgot Password handler
-      document.getElementById('forgot-password').addEventListener('click', async () => {
+      // Password Reset handler
+      document.getElementById('forgot-password').addEventListener('click', async (e) => {
+        e.preventDefault();
         const email = document.getElementById('login-email').value;
-        const errorDisplay = document.getElementById('login-error');
-        errorDisplay.textContent = '';
 
         if (!email) {
-          errorDisplay.textContent = 'Please enter your email first';
+          showError('Please enter your email address');
           return;
         }
 
         try {
-          const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: window.location.origin + '/reset-password.html'
+          const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${BASE_URL}/reset-password.html`
           });
 
           if (error) {
-            errorDisplay.textContent = `Password reset failed: ${error.message}`;
+            showError(`Password reset failed: ${error.message}`);
             return;
           }
 
-          // Successful password reset request
-          errorDisplay.style.color = 'green';
-          errorDisplay.textContent = 'Password reset link sent to your email.';
+          showSuccess('Password reset instructions have been sent to your email.');
         } catch (err) {
-          console.error('Unexpected password reset error:', err);
-          errorDisplay.textContent = 'An unexpected error occurred.';
+          showError('An unexpected error occurred. Please try again.');
+          console.error('Password reset error:', err);
+        }
+      });
+
+      // Check for authentication on page load
+      document.addEventListener('DOMContentLoaded', checkExistingSession);
+
+      // Handle auth state changes
+      supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN') {
+          window.location.href = `${BASE_URL}/dashboard.html`;
+        }
+        if (event === 'SIGNED_OUT') {
+          window.location.href = `${BASE_URL}/login.html`;
         }
       });
     </script>

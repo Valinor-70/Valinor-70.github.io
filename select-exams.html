@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Select Your Exams - GCSE Timetable</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body class="img js-fullheight" style="background-image: url(images/bg.jpg);">
+    <section class="ftco-section">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-md-8">
+            <div class="login-wrap p-0">
+              <h3 class="mb-4 text-center">Select Your Exams</h3>
+              <div class="exam-selection p-4" style="background: rgba(255,255,255,0.1); border-radius: 10px;">
+                <div id="exam-list" class="row">
+                  <!-- Exams will be populated here -->
+                </div>
+                <div class="text-center mt-4">
+                  <button id="save-exams" class="btn btn-primary px-5">Save My Exams</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/popper.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    
+    <script type="module">
+      import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+      const SUPABASE_URL = 'https://rcrsslbqoukogbvdvwrz.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjcnNzbGJxb3Vrb2didmR2d3J6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2OTM5MTUsImV4cCI6MjA1NDI2OTkxNX0.11[...]';
+      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      // Check if user is authenticated
+      const checkAuth = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          window.location.href = 'login.html';
+        }
+        return session;
+      };
+
+      // Load all available exams
+      const loadExams = async () => {
+        const { data: exams, error } = await supabase
+          .from('gcsedata')
+          .select('id, Subject, Board, Date')
+          .order('Date', { ascending: true });
+
+        if (error) {
+          console.error('Error loading exams:', error);
+          return;
+        }
+
+        const examList = document.getElementById('exam-list');
+        examList.innerHTML = exams.map(exam => `
+          <div class="col-md-6 mb-3">
+            <div class="exam-option">
+              <label class="checkbox-wrap w-100">
+                <input type="checkbox" value="${exam.id}" class="exam-checkbox">
+                <span class="checkmark"></span>
+                <div class="exam-details">
+                  <strong>${exam.Subject}</strong><br>
+                  ${exam.Board} - ${new Date(exam.Date).toLocaleDateString()}
+                </div>
+              </label>
+            </div>
+          </div>
+        `).join('');
+      };
+
+      // Save selected exams
+      const saveExams = async (session) => {
+        const selectedExams = Array.from(document.querySelectorAll('.exam-checkbox:checked'))
+          .map(checkbox => checkbox.value);
+
+        if (selectedExams.length === 0) {
+          alert('Please select at least one exam');
+          return;
+        }
+
+        // Get all exam IDs
+        const { data: allExams } = await supabase
+          .from('gcsedata')
+          .select('id');
+
+        // Create records for exams NOT selected
+        const notSelectedExams = allExams
+          .filter(exam => !selectedExams.includes(exam.id.toString()))
+          .map(exam => ({
+            user_id: session.user.id,
+            exam_id: exam.id
+          }));
+
+        const { error } = await supabase
+          .from('user_exams')
+          .insert(notSelectedExams);
+
+        if (error) {
+          console.error('Error saving exam selections:', error);
+          alert('Error saving your exam selections. Please try again.');
+          return;
+        }
+
+        window.location.href = 'dashboard.html';
+      };
+
+      // Initialize page
+      document.addEventListener('DOMContentLoaded', async () => {
+        const session = await checkAuth();
+        await loadExams();
+
+        document.getElementById('save-exams').addEventListener('click', () => {
+          saveExams(session);
+        });
+      });
+    </script>
+  </body>
+</html>

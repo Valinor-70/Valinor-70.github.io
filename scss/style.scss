@@ -1,154 +1,182 @@
+// Import Bootstrap components
 @import 'bootstrap/bootstrap';
 @import 'bootstrap/variables';
 @import 'bootstrap/mixins';
 
-$font-primary: 'Lato',Arial, sans-serif;
+// Variables
+$font-primary: 'Lato', Arial, sans-serif;
 $primary: #fbceb5;
+$black: #000;
+$white: #fff;
+$gray: #6c757d;
+$dark-overlay: rgba(0, 0, 0, 0.3);
+$transition-base: all 0.3s ease;
 
+// Base Styles
+body {
+  font-family: $font-primary;
+  font-size: 16px;
+  line-height: 1.8;
+  font-weight: normal;
+  color: lighten($black, 50%);
+  position: relative;
+  z-index: 0;
+  padding: 0;
+  
+  &:after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    content: '';
+    background: $black;
+    opacity: .3;
+    z-index: -1;
+  }
+}
 
-body{
-	font-family: $font-primary;
-	font-size: 16px;
-	line-height: 1.8;
-	font-weight: normal;
-	color: lighten($black,50%);
-	position: relative;
-	z-index: 0;
-	padding: 0;
-	&:after{
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		content: '';
-		background: $black;
-		opacity: .3;
-		z-index: -1;
-	}
-}
-a {
-	transition: .3s all ease;
-	color: $primary;
-	&:hover, &:focus {
-		text-decoration: none !important;
-		outline: none !important;
-		box-shadow: none;
-	}
-}
+// Typography
 h1, h2, h3, h4, h5,
 .h1, .h2, .h3, .h4, .h5 {
-	line-height: 1.5;
-	font-weight: 400;
-	font-family: $font-primary;
-	color: $black;
+  line-height: 1.5;
+  font-weight: 400;
+  font-family: $font-primary;
+  color: $white;
 }
 
-.bg-primary{
-	background: $primary !important;
+// Links
+a {
+  transition: $transition-base;
+  color: $primary;
+  
+  &:hover, &:focus {
+    text-decoration: none !important;
+    outline: none !important;
+    box-shadow: none;
+    color: darken($primary, 10%);
+  }
 }
 
-.ftco-section{
-	padding: 7em 0;
+// Section Utilities
+.ftco-section {
+  padding: 7em 0;
+  
+  @media (max-width: 768px) {
+    padding: 3em 0;
+  }
 }
 
-.ftco-no-pt{
-	padding-top: 0;
-}
-.ftco-no-pb{
-	padding-bottom: 0;
-}
-//HEADING SECTION
-.heading-section{
-	font-size: 28px;
-	color: $white;
-}
+.ftco-no-pt { padding-top: 0; }
+.ftco-no-pb { padding-bottom: 0; }
 
-//COVER BG
-.img{
-	background-size: cover;
-	background-repeat: no-repeat;
-	background-position: center center;
+// Background Utilities
+.bg-primary { background: $primary !important; }
+
+.img {
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
 }
 
-.login-wrap{
-	position: relative;
-	color: rgba(255,255,255,.9);
-	h3{
-		font-weight: 300;
-		color: $white;
-	}
-	.social{
-		width: 100%;
-		a{
-			width: 100%;
-			display: block;
-			border: 1px solid rgba(255,255,255,.4);
-			color: $black;
-			background: $white;
-			&:hover{
-				background: $black;
-				color: $white;
-				border-color: $black;
-			}
-		}
-	}
+// Login/Signup Components
+.login-wrap {
+  position: relative;
+  color: rgba($white, 0.9);
+  padding: 2rem;
+  border-radius: 10px;
+  background: rgba($black, 0.6);
+  
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+  }
+  
+  h3 {
+    font-weight: 300;
+    color: $white;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    
+    @media (max-width: 768px) {
+      font-size: 1.5rem;
+    }
+  }
 }
 
-.form-group{
-	position: relative;
+// Form Elements
+.form-group {
+  position: relative;
+  margin-bottom: 1.5rem;
+  
+  label {
+    color: rgba($white, 0.9);
+    margin-bottom: 0.5rem;
+    display: block;
+  }
 }
 
-.field-icon {
-	position: absolute;
-	top: 50%;
-	right: 15px;
-	transform: translateY(-50%);
-	color: rgba(255,255,255,.9);
+.form-control {
+  background: transparent;
+  border: none;
+  height: 50px;
+  color: $white !important;
+  border: 1px solid transparent;
+  background: rgba($white, 0.08);
+  border-radius: 40px;
+  padding: 0 20px;
+  transition: $transition-base;
+  
+  &::-webkit-input-placeholder {
+    color: rgba($white, 0.8) !important;
+  }
+  
+  &:focus {
+    background: transparent;
+    outline: none;
+    box-shadow: none;
+    border-color: rgba($white, 0.4);
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 16px; // Prevents zoom on iOS
+  }
 }
 
-//FORM CONTROL
-.form-control{
-	background: transparent;
-	border: none;
-	height: 50px;
-	color: rgba(255,255,255,1) !important;
-	border: 1px solid transparent;
-	background: rgba(255,255,255,.08);
-	border-radius: 40px;
-	padding-left: 20px;
-	padding-right: 20px;
-	@include transition(.3s);
-	&::-webkit-input-placeholder { /* Chrome/Opera/Safari */
-	  color: rgba(255,255,255,.8) !important;
-	}
-	&::-moz-placeholder { /* Firefox 19+ */
-	  color: rgba(255,255,255,.8) !important;
-	}
-	&:-ms-input-placeholder { /* IE 10+ */
-	  color: rgba(255,255,255,.8) !important;
-	}
-	&:-moz-placeholder { /* Firefox 18- */
-	  color: rgba(255,255,255,.8) !important;
-	}
-	&:hover, &:focus{
-		background: transparent;
-		outline: none;
-		box-shadow: none;
-		border-color: rgba(255,255,255,.4);
-	}
-	&:focus{
-		border-color: rgba(255,255,255,.4);
-	}
-}
-textarea.form-control {
-	height: inherit!important;
+// Exam Selection Styles
+.exam-selection {
+  background: rgba($white, 0.05);
+  border-radius: 10px;
+  padding: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
 }
 
+.exam-option {
+  background: rgba($white, 0.08);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  transition: $transition-base;
+  
+  &:hover {
+    background: rgba($white, 0.12);
+    transform: translateY(-2px);
+  }
+  
+  .exam-details {
+    color: rgba($white, 0.9);
+    padding-left: 2rem;
+    
+    strong {
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+  }
+}
 
-
-
-//CHECKBOX STYLE
+// Checkbox Styles
 .checkbox-wrap {
   display: block;
   position: relative;
@@ -156,93 +184,172 @@ textarea.form-control {
   margin-bottom: 12px;
   cursor: pointer;
   font-size: 16px;
-  font-weight: 500;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
   user-select: none;
-}
-
-/* Hide the browser's default checkbox */
-.checkbox-wrap input {
-  position: absolute;
-  opacity: 0;
-  cursor: pointer;
-  height: 0;
-  width: 0;
-}
-
-/* Create a custom checkbox */
-.checkmark {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-
-/* Create the checkmark/indicator (hidden when not checked) */
-.checkmark:after {
-  content: "\f0c8";
-  font-family: "FontAwesome";
-  position: absolute;
-  color:rgba(255,255,255,.1);
-  font-size: 20px;
-  margin-top: -4px;
-  @include transition(.3s);
-}
-
-/* Show the checkmark when checked */
-.checkbox-wrap{
-	input:checked ~ .checkmark:after {
-	  display: block;
-	  content: "\f14a";
-	  font-family: "FontAwesome";
-	  color: rgba(0,0,0,.2);
-	}
-}
-
-/* Style the checkmark/indicator */
-.checkbox-wrap .checkmark:after {
-}
-
-
-.checkbox-primary{
-  color: $primary;
+  
+  input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+  
+  .checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    
+    &:after {
+      content: "\f0c8";
+      font-family: "FontAwesome";
+      position: absolute;
+      color: rgba($white, 0.1);
+      font-size: 20px;
+      margin-top: -4px;
+      transition: $transition-base;
+    }
+  }
+  
   input:checked ~ .checkmark:after {
-	  color: $primary;
-	}
+    content: "\f14a";
+    color: $primary;
+  }
 }
 
-
-//BUTTON
+// Button Styles
 .btn {
-	cursor: pointer;
-	@include border-radius(40px);
-	box-shadow: none!important;
-	font-size: 15px;
-	text-transform: uppercase;
-	&:hover, &:active, &:focus {
-		outline: none;
-	}
-	&.btn-primary {
-		background: $primary !important;
-		border: 1px solid $primary !important;
-		color: $black !important;
-		&:hover {
-			border: 1px solid $primary;
-			background: transparent;
-			color :$primary;
-		}
-		&.btn-outline-primary {
-			border: 1px solid $primary;
-			background: transparent;
-			color :$primary;
-			&:hover {
-				border: 1px solid transparent;
-				background: $primary;
-				color :$white;
-			}
-		}
-	}
+  cursor: pointer;
+  border-radius: 40px;
+  box-shadow: none !important;
+  font-size: 15px;
+  text-transform: uppercase;
+  padding: 0.8rem 2rem;
+  transition: $transition-base;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  
+  &.btn-primary {
+    background: $primary !important;
+    border: 1px solid $primary !important;
+    color: $black !important;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    
+    &:hover {
+      background: darken($primary, 10%) !important;
+      border-color: darken($primary, 10%) !important;
+      transform: translateY(-2px);
+    }
+    
+    &.loading {
+      position: relative;
+      pointer-events: none;
+      opacity: 0.8;
+      
+      &:after {
+        content: '';
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+        border: 2px solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        margin-left: 0.5em;
+        animation: spin 0.6s linear infinite;
+      }
+    }
+  }
 }
 
+// Dashboard Styles
+.dashboard-container {
+  background: rgba($white, 0.05);
+  border-radius: 10px;
+  padding: 2rem;
+  margin-top: 2rem;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+}
+
+.table {
+  color: rgba($white, 0.9);
+  
+  th {
+    border-top: none;
+    border-bottom: 2px solid rgba($white, 0.1);
+    font-weight: 500;
+    padding: 1rem;
+  }
+  
+  td {
+    border-top: 1px solid rgba($white, 0.1);
+    padding: 1rem;
+  }
+  
+  tbody tr {
+    transition: $transition-base;
+    
+    &:hover {
+      background: rgba($white, 0.05);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+// Animations
+@keyframes spin {
+  to { 
+    transform: rotate(360deg);
+  }
+}
+
+// Error Messages
+.error-message {
+  color: #ff6b6b;
+  background: rgba(#ff6b6b, 0.1);
+  border-radius: 5px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  
+  &.success {
+    color: #51cf66;
+    background: rgba(#51cf66, 0.1);
+  }
+}
+
+// Container Responsiveness
+.container {
+  @media (max-width: 768px) {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+// Utility Classes
+.text-center { text-align: center; }
+.mt-4 { margin-top: 1.5rem; }
+.mb-4 { margin-bottom: 1.5rem; }
+.w-100 { width: 100%; }
+
+// Dark Mode Support
+@media (prefers-color-scheme: dark) {
+  .login-wrap {
+    background: rgba($black, 0.7);
+  }
+  
+  .form-control {
+    background: rgba($white, 0.05);
+  }
+}
