@@ -23,8 +23,6 @@
                 <th>Time</th>
                 <th>Length</th>
                 <th>Board</th>
-                <th>Level</th>
-                <th>Exam Code</th>
                 <th>Subject</th>
               </tr>
             </thead>
@@ -74,7 +72,7 @@
           const examIds = userExams.map(ue => ue.exam_id);
           const { data: exams, error: examsError } = await supabase
             .from('gcsedata')
-            .select('*')
+            .select('Week,Date,Time,Length,Board,Subject')
             .in('id', examIds);
 
           if (examsError) {
@@ -86,14 +84,12 @@
           const tableBody = document.getElementById('gcse-table-body');
           let rowsHTML = exams.map(item => `
             <tr>
-              <td>${item.week || ''}</td>
-              <td>${item.exam_date || ''}</td>
-              <td>${item.exam_time || ''}</td>
-              <td>${item.length || ''}</td>
-              <td>${item.board || ''}</td>
-              <td>${item.level || ''}</td>
-              <td>${item.exam_code || ''}</td>
-              <td>${item.subject || ''}</td>
+              <td>${item.Week || ''}</td> 
+              <td>${item.Date || ''}</td>
+              <td>${item.Time || ''}</td>
+              <td>${item.Length || ''}</td>
+              <td>${item.Board || ''}</td>
+              <td>${item.Subject || ''}</td>
             </tr>
           `).join('');
 
