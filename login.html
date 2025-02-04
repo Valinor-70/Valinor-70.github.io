@@ -39,8 +39,8 @@
                 
                 <!-- Error/Success message area -->
                 <div id="message-container" class="mb-3">
-                  <p id="login-error" class="error-message" style="display: none;"></p>
-                  <p id="success-message" class="success-message" style="display: none;"></p>
+                  <p id="login-error" class="error-message"></p>
+                  <p id="success-message" class="success-message"></p>
                 </div>
 
                 <div class="form-group">
@@ -56,7 +56,7 @@
               </form>
 
               <div class="w-100 text-center mt-3">
-                <a href="#" id="forgot-password" style="color: #fff">Forgot Password?</a>
+                <a href="#" id="forgot-password">Forgot Password?</a>
               </div>
             </div>
           </div>
@@ -71,17 +71,13 @@
       const SUPABASE_URL = 'https://rcrsslbqoukogbvdvwrz.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjcnNzbGJxb3Vrb2didmR2d3J6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2OTM5MTUsImV4cCI6MjA1NDI2OTkxNX0.11uWp9T-q2Zw2qcj19Z6ahmXc_aXTf0oUZsdIKkW_dQ';
 
-      // Get the current domain
-      const BASE_URL = window.location.origin;
-
-      // Initialize Supabase client with dynamic redirect configuration
+      // Initialize Supabase client
       const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
         auth: {
           autoRefreshToken: true,
           persistSession: true,
           detectSessionInUrl: true,
-          flowType: 'pkce',
-          redirectTo: `${BASE_URL}/select-exams.html`
+          storage: window.localStorage
         }
       });
 
@@ -102,11 +98,11 @@
         errorElement.style.display = 'none';
       };
 
-      // Check if user is already authenticated
+      // Check existing session
       const checkExistingSession = async () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (session) {
-          window.location.href = `${BASE_URL}/dashboard.html`;
+          window.location.href = `${window.location.origin}/dashboard.html`;
         }
       };
 
@@ -115,31 +111,26 @@
         e.preventDefault();
         const email = document.getElementById('login-email').value;
         const password = document.getElementById('login-password').value;
+        const signInButton = document.getElementById('sign-in-btn');
 
         try {
-          const signInButton = document.getElementById('sign-in-btn');
-          signInButton.classList.add('loading');
           signInButton.disabled = true;
+          signInButton.classList.add('loading');
 
           const { data, error } = await supabase.auth.signInWithPassword({
-            email,
-            password
+            email: email.trim(),
+            password: password
           });
 
-          if (error) {
-            showError(`Login failed: ${error.message}`);
-            return;
-          }
+          if (error) throw error;
 
-          // Successful login
-          window.location.href = `${BASE_URL}/dashboard.html`;
+          window.location.href = `${window.location.origin}/dashboard.html`;
         } catch (err) {
-          showError('An unexpected error occurred. Please try again.');
+          showError(err.message);
           console.error('Login error:', err);
         } finally {
-          const signInButton = document.getElementById('sign-in-btn');
-          signInButton.classList.remove('loading');
           signInButton.disabled = false;
+          signInButton.classList.remove('loading');
         }
       });
 
@@ -147,41 +138,29 @@
       document.getElementById('sign-up-btn').addEventListener('click', async () => {
         const email = document.getElementById('login-email').value;
         const password = document.getElementById('login-password').value;
-
-        if (!email || !password) {
-          showError('Please enter both email and password');
-          return;
-        }
+        const signUpButton = document.getElementById('sign-up-btn');
 
         try {
-          const signUpButton = document.getElementById('sign-up-btn');
-          signUpButton.classList.add('loading');
           signUpButton.disabled = true;
+          signUpButton.classList.add('loading');
 
           const { data, error } = await supabase.auth.signUp({
-            email,
-            password,
+            email: email.trim(),
+            password: password,
             options: {
-              emailRedirectTo: `${BASE_URL}/select-exams.html`,
-              data: {
-                created_at: new Date().toISOString()
-              }
+              emailRedirectTo: `${window.location.origin}/select-exams.html`
             }
           });
 
-          if (error) {
-            showError(`Sign up failed: ${error.message}`);
-            return;
-          }
+          if (error) throw error;
 
           showSuccess('Account created! Please check your email to verify your account.');
         } catch (err) {
-          showError('An unexpected error occurred. Please try again.');
+          showError(err.message);
           console.error('Sign up error:', err);
         } finally {
-          const signUpButton = document.getElementById('sign-up-btn');
-          signUpButton.classList.remove('loading');
           signUpButton.disabled = false;
+          signUpButton.classList.remove('loading');
         }
       });
 
@@ -197,31 +176,25 @@
 
         try {
           const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: `${BASE_URL}/reset-password.html`
+            redirectTo: `${window.location.origin}/reset-password.html`
           });
 
-          if (error) {
-            showError(`Password reset failed: ${error.message}`);
-            return;
-          }
+          if (error) throw error;
 
           showSuccess('Password reset instructions have been sent to your email.');
         } catch (err) {
-          showError('An unexpected error occurred. Please try again.');
+          showError(err.message);
           console.error('Password reset error:', err);
         }
       });
 
-      // Check for authentication on page load
+      // Initialize
       document.addEventListener('DOMContentLoaded', checkExistingSession);
 
-      // Handle auth state changes
+      // Auth state change handler
       supabase.auth.onAuthStateChange((event, session) => {
         if (event === 'SIGNED_IN') {
-          window.location.href = `${BASE_URL}/dashboard.html`;
-        }
-        if (event === 'SIGNED_OUT') {
-          window.location.href = `${BASE_URL}/login.html`;
+          window.location.href = `${window.location.origin}/dashboard.html`;
         }
       });
     </script>
