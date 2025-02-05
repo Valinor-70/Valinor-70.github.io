@@ -125,7 +125,17 @@
 
       const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       const CURRENT_DATE = new Date('2025-02-04T20:28:04Z');
+      function updateDateTime() {
+        const now = new Date();
+        CURRENT_DATE.setTime(now.getTime());
+        document.querySelector('.datetime-display').textContent = 
+        `Current Date and Time : ${now.toISOString().replace('T', ' ').slice(0, 19)}`;
+      }
 
+      function updateUserInfo(session) {
+        document.querySelector('.user-info').textContent = 
+        `Current User: ${session.user.email}`;
+      }
       function formatDate(dateStr) {
         if (!dateStr) return 'TBC';
         const [day, month, year] = dateStr.split('/');
@@ -234,6 +244,9 @@
             window.location.href = 'login.html';
             return;
           }
+        updateUserInfo(session);
+
+        document.getElementById('loading-message').style.display = 'block';
 
           document.getElementById('loading-message').style.display = 'block';
           const weeksContainer = document.getElementById('weeks-container');
@@ -280,27 +293,31 @@
       }
 
       document.addEventListener('DOMContentLoaded', () => {
-        loadUserExams();
+    loadUserExams();
+    
+    // Set up auto-updating datetime
+    updateDateTime(); // Initial update
+    setInterval(updateDateTime, 1000); // Update every second
 
-        ['select-exams-btn', 'select-exams-btn-main'].forEach(btnId => {
-          const btn = document.getElementById(btnId);
-          if (btn) {
+    ['select-exams-btn', 'select-exams-btn-main'].forEach(btnId => {
+        const btn = document.getElementById(btnId);
+        if (btn) {
             btn.addEventListener('click', () => {
-              window.location.href = 'select-exams.html';
+                window.location.href = 'select-exams.html';
             });
-          }
-        });
+        }
+    });
 
-        document.getElementById('logout-btn').addEventListener('click', async () => {
-          try {
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+        try {
             await supabase.auth.signOut();
             window.location.href = 'login.html';
-          } catch (err) {
+        } catch (err) {
             console.error('Logout error:', err);
             alert('Error logging out. Please try again.');
-          }
-        });
-      });
+        }
+    });
+});
     </script>
   </body>
 </html>

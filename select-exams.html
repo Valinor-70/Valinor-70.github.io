@@ -23,16 +23,24 @@
             border-radius: 10px;
             margin-bottom: 20px;
         }
+        /* Add to existing styles */
         .exam-card {
+            cursor: pointer;
+            user-select: none;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
             padding: 15px;
             margin-bottom: 15px;
-            transition: transform 0.2s;
+            transition: transform 0.2s, background-color 0.2s;
         }
+
         .exam-card:hover {
             transform: translateY(-2px);
             background: rgba(255, 255, 255, 0.15);
+        }
+
+        .exam-card.selected {
+            background: rgba(255, 255, 255, 0.2);
         }
         .exam-date {
             color: #ffd700;
@@ -68,6 +76,9 @@
             align-items: center;
             z-index: 1000;
         }
+        .exam-checkbox {
+            pointer-events: none; /* This prevents the checkbox from capturing clicks */
+        }
         .status-message {
             background: rgba(0, 0, 0, 0.5);
             color: white;
@@ -87,7 +98,7 @@
                     <div>
                         <h2 class="text-white mb-2">Select Your GCSE Exams</h2>
                         <div class="user-info">Current User's Login: Valinor-70</div>
-                        <div class="datetime-display">Current Date and Time (UTC - YYYY-MM-DD HH:MM:SS formatted): 2025-02-04 20:39:29</div>
+                        <div class="datetime-display">Current Date and Time (UTC - YYYY-MM-DD HH:MM:SS formatted): 2025-02-05 14:43:15</div>
                     </div>
                     <div>
                         <a href="dashboard.html" class="btn btn-secondary me-2">Back to Dashboard</a>
@@ -145,201 +156,250 @@
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
 
-        const SUPABASE_URL = 'https://rcrsslbqoukogbvdvwrz.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjcnNzbGJxb3Vrb2didmR2d3J6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2OTM5MTUsImV4cCI6MjA1NDI2OTkxNX0.11uWp9T-q2Zw2qcj19Z6ahmXc_aXTf0oUZsdIKkW_dQ';
+const SUPABASE_URL = 'https://rcrsslbqoukogbvdvwrz.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjcnNzbGJxb3Vrb2didmR2d3J6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2OTM5MTUsImV4cCI6MjA1NDI2OTkxNX0.11uWp9T-q2Zw2qcj19Z6ahmXc_aXTf0oUZsdIKkW_dQ';
 
-        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        let allExams = [];
-        let currentSession = null;
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let allExams = [];
+let currentSession = null;
+let currentSelections = new Map();
 
-        async function loadExams() {
-            try {
-                const { data: exams, error: examsError } = await supabase
-                    .from('gcsedata')
-                    .select('*')
-                    .order('Date', { ascending: true });
+function updateDateTime() {
+    const now = new Date();
+    const formattedDate = now.toISOString().replace('T', ' ').slice(0, 19);
+    document.querySelector('.datetime-display').textContent = 
+        `Current Date and Time : ${formattedDate}`;
+}
 
-                if (examsError) throw examsError;
+function updateUserInfo(session) {
+    document.querySelector('.user-info').textContent = 
+        `Current User's Login: ${session.user.email}`;
+}
 
-                const { data: userExams, error: userExamsError } = await supabase
-                    .from('user_exams')
-                    .select('exam_id')
-                    .eq('user_id', currentSession.user.id);
+async function ensureUserExists(session) {
+    try {
+        const { data, error: checkError } = await supabase
+            .from('userdata')
+            .select('id')
+            .eq('id', session.user.id);
 
-                if (userExamsError) throw userExamsError;
+        if (checkError) throw checkError;
 
-                allExams = exams || [];
-                const excludedExamIds = userExams?.map(ue => ue.exam_id) || [];
-                filterAndDisplayExams(excludedExamIds);
+        if (!data || data.length === 0) {
+            const { error: insertError } = await supabase
+                .from('userdata')
+                .insert([{
+                    id: session.user.id,
+                    email: session.user.email
+                }]);
 
-            } catch (err) {
-                console.error('Error:', err);
-                document.getElementById('error-message').textContent = 'Error loading exams. Please try again.';
-                document.getElementById('error-message').style.display = 'block';
-            }
-            document.getElementById('loading-message').style.display = 'none';
+            if (insertError) throw insertError;
         }
+    } catch (err) {
+        console.error('Ensure user exists error:', err);
+        throw err;
+    }
+}
 
-        function filterAndDisplayExams(excludedExamIds = []) {
-            const subjectSearch = document.getElementById('subject-search').value.toLowerCase();
-            const boardSearch = document.getElementById('board-search').value.toLowerCase();
+async function loadExams() {
+    try {
+        document.getElementById('loading-message').style.display = 'block';
+        document.getElementById('exam-list').style.display = 'none';
+        document.getElementById('error-message').style.display = 'none';
 
-            const filteredExams = allExams.filter(exam => 
-                exam.Subject?.toLowerCase().includes(subjectSearch) &&
-                exam.Board?.toLowerCase().includes(boardSearch)
-            );
+        const { data: exams, error: examsError } = await supabase
+            .from('gcsedata')
+            .select('*')
+            .order('Date', { ascending: true });
 
-            const examList = document.getElementById('exam-list');
-            const noResults = document.getElementById('no-results');
+        if (examsError) throw examsError;
 
-            if (filteredExams.length === 0) {
-                examList.style.display = 'none';
-                noResults.style.display = 'block';
-                return;
-            }
+        const { data: userExams, error: userExamsError } = await supabase
+            .from('user_exams')
+            .select('exam_id')
+            .eq('user_id', currentSession.user.id);
 
-            noResults.style.display = 'none';
-            examList.style.display = 'flex';
-            examList.innerHTML = filteredExams.map(exam => `
-                <div class="col-md-6 mb-3">
-                    <div class="exam-card">
-                        <div class="form-check">
-                            <input class="form-check-input exam-checkbox" 
-                                   type="checkbox" 
-                                   value="${exam.id}"
-                                   id="exam-${exam.id}"
-                                   ${!excludedExamIds.includes(exam.id) ? 'checked' : ''}>
-                            <label class="form-check-label text-white" for="exam-${exam.id}">
-                                <div class="exam-date">${exam.Date || 'TBC'}</div>
-                                <div class="h5 mb-1">${exam.Subject}</div>
-                                <div class="text-light">${exam.Board}</div>
-                                <div class="exam-time">
-                                    Time: ${exam.Time || 'TBC'}<br>
-                                    Length: ${exam.Length || 'TBC'}
-                                </div>
-                            </label>
-                        </div>
+        if (userExamsError) throw userExamsError;
+
+        allExams = exams || [];
+        const excludedExamIds = (userExams || []).map(ue => Number(ue.exam_id));
+        
+        currentSelections = new Map(
+            allExams.map(exam => [
+                Number(exam.id), 
+                !excludedExamIds.includes(Number(exam.id))
+            ])
+        );
+
+        filterAndDisplayExams();
+
+    } catch (err) {
+        console.error('Load exams error:', err);
+        document.getElementById('error-message').textContent = `Error loading exams: ${err.message}`;
+        document.getElementById('error-message').style.display = 'block';
+    }
+    document.getElementById('loading-message').style.display = 'none';
+}
+
+function filterAndDisplayExams() {
+    const subjectSearch = document.getElementById('subject-search').value.toLowerCase();
+    const boardSearch = document.getElementById('board-search').value.toLowerCase();
+
+    const filteredExams = allExams.filter(exam => 
+        exam.Subject?.toLowerCase().includes(subjectSearch) &&
+        exam.Board?.toLowerCase().includes(boardSearch)
+    );
+
+    const examList = document.getElementById('exam-list');
+    const noResults = document.getElementById('no-results');
+
+    if (filteredExams.length === 0) {
+        examList.style.display = 'none';
+        noResults.style.display = 'block';
+        return;
+    }
+
+    noResults.style.display = 'none';
+    examList.style.display = 'flex';
+    examList.innerHTML = filteredExams.map(exam => {
+        const examId = Number(exam.id);
+        const isChecked = currentSelections.get(examId);
+
+        return `
+            <div class="col-md-6 mb-3">
+                <div class="exam-card ${isChecked ? 'selected' : ''}" data-exam-id="${examId}">
+                    <div class="form-check">
+                        <input class="form-check-input exam-checkbox" 
+                               type="checkbox" 
+                               value="${examId}"
+                               id="exam-${examId}"
+                               ${isChecked ? 'checked' : ''}>
+                        <label class="form-check-label text-white w-100" for="exam-${examId}">
+                            <div class="exam-date">${exam.Date || 'TBC'}</div>
+                            <div class="h5 mb-1">${exam.Subject}</div>
+                            <div class="text-light">${exam.Board}</div>
+                            <div class="exam-time">
+                                Time: ${exam.Time || 'TBC'}<br>
+                                Length: ${exam.Length || 'TBC'}
+                            </div>
+                        </label>
                     </div>
                 </div>
-            `).join('');
+            </div>
+        `;
+    }).join('');
 
+    updateSelectAllCheckbox();
+}
+
+function updateSelectAllCheckbox() {
+    const checkboxes = document.querySelectorAll('.exam-checkbox');
+    const selectAllCheckbox = document.getElementById('select-all');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    const allUnchecked = Array.from(checkboxes).every(cb => !cb.checked);
+    
+    selectAllCheckbox.checked = allChecked;
+    selectAllCheckbox.indeterminate = !allChecked && !allUnchecked;
+}
+
+async function saveSelections() {
+    const loadingOverlay = document.getElementById('loading-overlay');
+    loadingOverlay.style.display = 'flex';
+
+    try {
+        document.querySelectorAll('.exam-checkbox').forEach(cb => {
+            currentSelections.set(Number(cb.value), cb.checked);
+        });
+
+        const notSelectedExams = Array.from(currentSelections.entries())
+            .filter(([_, isSelected]) => !isSelected)
+            .map(([examId, _]) => ({
+                user_id: currentSession.user.id,
+                exam_id: examId
+            }));
+
+        await supabase
+            .from('user_exams')
+            .delete()
+            .eq('user_id', currentSession.user.id);
+
+        if (notSelectedExams.length > 0) {
+            const { error: insertError } = await supabase
+                .from('user_exams')
+                .insert(notSelectedExams);
+
+            if (insertError) throw insertError;
+        }
+
+        window.location.href = 'dashboard.html';
+    } catch (err) {
+        console.error('Save selections error:', err);
+        alert('Error saving your selections. Please try again.');
+        loadingOverlay.style.display = 'none';
+    }
+}
+
+function setupEventListeners() {
+    document.getElementById('select-all').addEventListener('change', (e) => {
+        const isChecked = e.target.checked;
+        document.querySelectorAll('.exam-checkbox').forEach(cb => {
+            cb.checked = isChecked;
+            currentSelections.set(Number(cb.value), isChecked);
+            cb.closest('.exam-card').classList.toggle('selected', isChecked);
+        });
+    });
+
+    ['subject-search', 'board-search'].forEach(id => {
+        document.getElementById(id).addEventListener('input', filterAndDisplayExams);
+    });
+
+    document.getElementById('save-button').addEventListener('click', saveSelections);
+
+    document.getElementById('exam-list').addEventListener('click', (e) => {
+        const examCard = e.target.closest('.exam-card');
+        if (examCard) {
+            const checkbox = examCard.querySelector('.exam-checkbox');
+            const examId = Number(checkbox.value);
+            const newState = !checkbox.checked;
+            
+            checkbox.checked = newState;
+            currentSelections.set(examId, newState);
+            examCard.classList.toggle('selected', newState);
+            
             updateSelectAllCheckbox();
         }
+    });
 
-        function updateSelectAllCheckbox() {
-            const checkboxes = document.querySelectorAll('.exam-checkbox');
-            const selectAllCheckbox = document.getElementById('select-all');
-            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-            const allUnchecked = Array.from(checkboxes).every(cb => !cb.checked);
-            
-            selectAllCheckbox.checked = allChecked;
-            selectAllCheckbox.indeterminate = !allChecked && !allUnchecked;
+    // Update datetime every second
+    setInterval(updateDateTime, 1000);
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) throw sessionError;
+        
+        if (!session) {
+            window.location.href = 'login.html';
+            return;
         }
 
-        async function saveSelections() {
-            const selectedExams = Array.from(document.querySelectorAll('.exam-checkbox:checked'))
-                .map(cb => parseInt(cb.value));
+        currentSession = session;
+        
+        updateDateTime();
+        updateUserInfo(session);
 
-            if (selectedExams.length === 0) {
-                alert('Please select at least one exam');
-                return;
-            }
+        await ensureUserExists(session);
+        await loadExams();
+        setupEventListeners();
 
-            const loadingOverlay = document.getElementById('loading-overlay');
-            loadingOverlay.style.display = 'flex';
-
-            try {
-                // Delete existing selections f
-                await supabase
-                    .from('user_exams')
-                    .delete()
-                    .eq('user_id', currentSession.user.id);
-
-                // Insert new selections for excluded exams
-                const notSelectedExams = allExams
-                    .filter(exam => !selectedExams.includes(exam.id))
-                    .map(exam => ({
-                        user_id: currentSession.user.id,
-                        exam_id: exam.id
-                    }));
-
-                if (notSelectedExams.length > 0) {
-                    const { error: insertError } = await supabase
-                        .from('user_exams')
-                        .insert(notSelectedExams);
-
-                    if (insertError) throw insertError;
-                }
-
-                window.location.href = 'dashboard.html';
-            } catch (err) {
-                console.error('Error saving selections:', err);
-                alert('Error saving your selections. Please try again.');
-                loadingOverlay.style.display = 'none';
-            }
-        }
-
-        async function ensureUserExists(session) {
-            try {
-                const { data: userData, error: checkError } = await supabase
-                    .from('userdata')
-                    .select('*')
-                    .eq('id', session.user.id)
-                    .single();
-
-                if (checkError) throw checkError;
-
-                if (!userData) {
-                    const { error: insertError } = await supabase
-                        .from('userdata')
-                        .insert([{
-                            id: session.user.id,
-                            email: session.user.email,
-                            created_at: new Date().toISOString()
-                        }]);
-
-                    if (insertError) throw insertError;
-                }
-            } catch (err) {
-                console.error('Error ensuring user exists:', err);
-                throw err;
-            }
-        }
-
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-                if (sessionError) throw sessionError;
-                
-                if (!session) {
-                    window.location.href = 'login.html';
-                    return;
-                }
-
-                currentSession = session;
-                await ensureUserExists(session);
-                await loadExams();
-
-                // Setup event listeners
-                document.getElementById('select-all').addEventListener('change', (e) => {
-                    const checkboxes = document.querySelectorAll('.exam-checkbox');
-                    checkboxes.forEach(cb => cb.checked = e.target.checked);
-                });
-
-                ['subject-search', 'board-search'].forEach(id => {
-                    document.getElementById(id).addEventListener('input', () => filterAndDisplayExams());
-                });
-
-                document.getElementById('save-button').addEventListener('click', saveSelections);
-
-            } catch (err) {
-                console.error('Initialization error:', err);
-                document.getElementById('error-message').textContent = 'Error initializing page. Please refresh and try again.';
-                document.getElementById('error-message').style.display = 'block';
-                document.getElementById('loading-message').style.display = 'none';
-            }
-        });
+    } catch (err) {
+        console.error('Initialization error:', err);
+        document.getElementById('error-message').textContent = `Error initializing page: ${err.message}`;
+        document.getElementById('error-message').style.display = 'block';
+        document.getElementById('loading-message').style.display = 'none';
+    }
+});
     </script>
 </body>
 </html>
