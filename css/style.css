@@ -7926,7 +7926,12 @@ button.bg-dark:focus {
   text-align: right !important; }
 
 .text-center {
-  text-align: center !important; }
+  text-align: center !important; 
+  text-align: center;
+  font-size: 2em;
+  color: #ffffff;
+  margin-top: 20px;
+}
 
 @media (min-width: 576px) {
   .text-sm-left {
