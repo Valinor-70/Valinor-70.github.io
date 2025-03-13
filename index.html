@@ -1,34 +1,82 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <title>GCSE Timetable Checker</title>
+    <title>GCSE Timetable Checker | Exam Schedule & Revision Planning</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <meta name="description" content="Track your GCSE exam schedule and create a revision timetable with our user-friendly interface. Stay organized and prepared for your exams.">
+    <meta name="description" content="Track your GCSE exam schedule and create a revision timetable with our user-friendly interface. Stay organized and prepared for your exams." />
+    <meta name="keywords" content="GCSE timetable, GCSE exam schedule, revision planner, exam preparation, GCSE revision, exam timetable" />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="GCSE Timetable Checker" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="GCSE Timetable Checker | Organize Your Exam Schedule" />
+    <meta property="og:description" content="Track your GCSE exam schedule and create a personalized revision timetable. Stay organized and prepared for your exams." />
+    <meta property="og:image" content="images/gcse-timetable-preview.jpg" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="GCSE Timetable Checker | Organize Your Exam Schedule" />
+    <meta name="twitter:description" content="Track your GCSE exam schedule and create a personalized revision timetable. Stay organized and prepared for your exams." />
+    <meta name="twitter:image" content="images/gcse-timetable-preview.jpg" />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://myexams.org/index.html" />
+    
+    <!-- Favicon -->
+    <link rel="icon" href="favicon.ico" />
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png" />
+    
     <link rel="stylesheet" href="css/style.css" />
+    
+    <!-- Structured Data / Schema -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "GCSE Timetable Checker",
+        "description": "Track your GCSE exam schedule and create a revision timetable with our user-friendly interface.",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "Web",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "GBP"
+        }
+      }
+    </script>
   </head>
   <body class="img js-fullheight" style="background-image: url(images/bg.jpg);">
-    <h1 class="text-center">Welcome to the GCSE Timetable Checker</h1>
-    <section class="ftco-section">
-      <div class="container">
-        <div class="row justify-content-center">
-          <div class="col-md-6 col-lg-4">
-            <div class="login-wrap p-0">
-              <h3 class="mb-4 text-center">GCSE Timetable</h3>
-              <div class="exam-list">
-                <p>Your upcoming exams will appear here once authenticated.</p>
-              </div>
-              <div class="revision-timetable">
-                <p>Your revision timetable will appear here once authenticated.</p>
-              </div>
-              <div class="text-center mt-4">
-                <a href="login.html" class="btn btn-primary">Log In or Get Started to See My Exams</a>
+    <main>
+      <h1 class="text-center">Welcome to the GCSE Timetable Checker</h1>
+      <section class="ftco-section">
+        <div class="container">
+          <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-4">
+              <div class="login-wrap p-0">
+                <h2 class="mb-4 text-center">GCSE Timetable</h2>
+                <div class="exam-list">
+                  <p>Your upcoming exams will appear here once authenticated.</p>
+                </div>
+                <div class="revision-timetable">
+                  <p>Your revision timetable will appear here once authenticated.</p>
+                </div>
+                <div class="text-center mt-4">
+                  <a href="login.html" class="btn btn-primary" title="Log in to view your GCSE exam timetable">Log In or Get Started to See My Exams</a>
+                </div>
               </div>
             </div>
           </div>
         </div>
+      </section>
+    </main>
+    <footer>
+      <!-- Hidden footer for SEO purposes -->
+      <div style="display:none;">
+        <p>GCSE Timetable Checker - The ultimate tool for organizing your GCSE exam schedule and revision plan.</p>
       </div>
-    </section>
+    </footer>
     <script src="js/jquery.min.js"></script>
     <script src="js/popper.js"></script>
     <script src="js/bootstrap.min.js"></script>
