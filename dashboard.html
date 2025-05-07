@@ -5,6 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css" />
     <style>
       .week-container {
@@ -73,6 +74,118 @@
         font-size: 0.9em;
         color: #ff9999;
       }
+      .error-message {
+        background: rgba(220, 53, 69, 0.2);
+        color: #ff6b6b;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        display: none;
+      }
+      /* New styles for enhanced UI */
+      .stats-container {
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+        display: none;
+      }
+      .stat-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+        transition: transform 0.2s;
+      }
+      .stat-card:hover {
+        transform: translateY(-3px);
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #ffd700;
+      }
+      .stat-label {
+        color: #98fb98;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        margin-top: 5px;
+      }
+      .filter-container {
+        display: flex;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+        display: none;
+      }
+      .filter-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        transition: all 0.2s;
+      }
+      .filter-btn:hover, .filter-btn.active {
+        background: rgba(255, 215, 0, 0.3);
+        color: #ffd700;
+      }
+      .next-exam-alert {
+        background: rgba(255, 215, 0, 0.15);
+        border-left: 4px solid #ffd700;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        color: white;
+        display: none;
+      }
+      .exam-icon {
+        margin-right: 8px;
+        color: #ffd700;
+      }
+      .board-badge {
+        font-size: 0.85rem;
+        padding: 3px 8px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 4px;
+        display: inline-block;
+        margin-top: 5px;
+        color: #98fb98;
+      }
+      .exam-details {
+        margin-top: 10px;
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.7);
+      }
+      .exam-info {
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+        color: white;
+        display: none;
+      }
+      .exam-info h4 {
+        color: #ffd700;
+        margin-bottom: 15px;
+      }
+      .exam-info ul {
+        list-style-type: none;
+        padding-left: 0;
+      }
+      .exam-info li {
+        padding: 5px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .exam-info li:last-child {
+        border-bottom: none;
+      }
+      .exam-info i {
+        color: #98fb98;
+        margin-right: 10px;
+      }
     </style>
   </head>
   <body class="img js-fullheight" style="background-image: url(images/bg.jpg);">
@@ -85,13 +198,75 @@
               <h2 class="text-white mb-2">My GCSE Timetable</h2>
               <div class="user-info mb-1">Current User: Valinor-70</div>
               <div class="datetime-display">
-                Current Date and Time (UTC): 2025-02-04 20:28:04
+                Current Date and Time (UTC - YYYY-MM-DD HH:MM:SS formatted): 2025-05-07 15:20:26
               </div>
             </div>
             <div>
               <button id="select-exams-btn" class="btn btn-primary me-2">Select Exams</button>
               <button id="logout-btn" class="btn btn-danger">Logout</button>
             </div>
+          </div>
+        </div>
+
+        <!-- Stats Overview -->
+        <div id="stats-container" class="stats-container">
+          <div class="row">
+            <div class="col-md-3 col-6 mb-3">
+              <div class="stat-card">
+                <div><i class="fas fa-calendar-day fa-2x mb-2" style="color: #98fb98;"></i></div>
+                <div class="stat-value" id="total-exams">0</div>
+                <div class="stat-label">Total Exams</div>
+              </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+              <div class="stat-card">
+                <div><i class="fas fa-book fa-2x mb-2" style="color: #98fb98;"></i></div>
+                <div class="stat-value" id="unique-subjects">0</div>
+                <div class="stat-label">Subjects</div>
+              </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+              <div class="stat-card">
+                <div><i class="fas fa-hourglass-start fa-2x mb-2" style="color: #98fb98;"></i></div>
+                <div class="stat-value" id="days-to-next">0</div>
+                <div class="stat-label">Days to Next</div>
+              </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+              <div class="stat-card">
+                <div><i class="fas fa-check-circle fa-2x mb-2" style="color: #98fb98;"></i></div>
+                <div class="stat-value" id="completed-exams">0</div>
+                <div class="stat-label">Completed</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Buttons -->
+        <div id="filter-container" class="filter-container">
+          <button class="filter-btn active" data-filter="all"><i class="fas fa-list"></i> All Exams</button>
+          <button class="filter-btn" data-filter="upcoming"><i class="fas fa-hourglass-start"></i> Upcoming (7 days)</button>
+          <button class="filter-btn" data-filter="today"><i class="fas fa-calendar-day"></i> Today</button>
+          <button class="filter-btn" data-filter="past"><i class="fas fa-history"></i> Past Exams</button>
+        </div>
+
+        <!-- Next Exam Alert -->
+        <div id="next-exam-alert" class="next-exam-alert">
+          <div class="d-flex align-items-center">
+            <i class="fas fa-bell fa-lg me-3"></i>
+            <div>
+              <h5 class="mb-1" id="next-exam-title">Your next exam is soon</h5>
+              <p class="mb-0" id="next-exam-details"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error message -->
+        <div id="error-message" class="error-message">
+          <strong>Error:</strong> <span id="error-text"></span>
+          <div class="mt-2">
+            <button id="retry-btn" class="btn btn-sm btn-light me-2">Retry</button>
+            <button id="to-login-btn" class="btn btn-sm btn-secondary">Go to Login</button>
           </div>
         </div>
 
@@ -114,6 +289,18 @@
           <!-- Weeks container -->
           <div id="weeks-container"></div>
         </div>
+
+        <!-- Exam Info -->
+        <div id="exam-info" class="exam-info">
+          <h4><i class="fas fa-info-circle"></i> Exam Information</h4>
+          <ul>
+            <li><i class="fas fa-graduation-cap"></i> Bring your candidate ID card to all exams</li>
+            <li><i class="fas fa-clock"></i> Arrive at least 15 minutes before the exam start time</li>
+            <li><i class="fas fa-pen"></i> Bring black pens, pencils, and other required equipment</li>
+            <li><i class="fas fa-mobile-alt"></i> Mobile phones and smart watches must be turned off and stored away</li>
+            <li><i class="fas fa-calendar-check"></i> Check your timetable regularly for any updates</li>
+          </ul>
+        </div>
       </div>
     </section>
 
@@ -124,36 +311,96 @@
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjcnNzbGJxb3Vrb2didmR2d3J6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2OTM5MTUsImV4cCI6MjA1NDI2OTkxNX0.11uWp9T-q2Zw2qcj19Z6ahmXc_aXTf0oUZsdIKkW_dQ';
 
       const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      const CURRENT_DATE = new Date('2025-02-04T20:28:04Z');
+      let CURRENT_DATE = new Date('2025-05-07T15:20:26Z'); // Updated to the requested date
+      
+      function formatDateTime(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      }
+      
       function updateDateTime() {
-        const now = new Date();
-        CURRENT_DATE.setTime(now.getTime());
+        // For real-time use, uncomment this line:
+        // CURRENT_DATE = new Date();
+        
+        // Using the fixed date for demonstration
         document.querySelector('.datetime-display').textContent = 
-        `Current Date and Time : ${now.toISOString().replace('T', ' ').slice(0, 19)}`;
+          `Current Date and Time (UTC - YYYY-MM-DD HH:MM:SS formatted): ${formatDateTime(CURRENT_DATE)}`;
       }
 
-      function updateUserInfo(session) {
+      function updateUserInfo(username = 'Valinor-70') {
         document.querySelector('.user-info').textContent = 
-        `Current User: ${session.user.email}`;
+          `Current User: ${username}`;
       }
+      
+      function showError(error) {
+        const errorElement = document.getElementById('error-message');
+        const errorTextElement = document.getElementById('error-text');
+        
+        let errorMessage = error;
+        if (typeof error === 'object') {
+          errorMessage = error.message || 'Unknown error occurred';
+          if (error.status === 401) {
+            errorMessage = 'Authentication error. Please log in again. (ERROR CODE 401)';
+          }
+        }
+        
+        errorTextElement.textContent = errorMessage;
+        errorElement.style.display = 'block';
+        document.getElementById('loading-message').style.display = 'none';
+      }
+      
+      function hideError() {
+        document.getElementById('error-message').style.display = 'none';
+      }
+      
       function formatDate(dateStr) {
         if (!dateStr) return 'TBC';
         const [day, month, year] = dateStr.split('/');
-        const fullYear = '20' + year;
-        const date = new Date(`${fullYear}-${month}-${day}`);
-        return date.toLocaleDateString('en-GB', {
-          weekday: 'long',
-          day: '2-digit',
-          month: 'long',
-          year: 'numeric'
-        });
+        const fullYear = year.length === 2 ? '20' + year : year;
+        try {
+          const date = new Date(`${fullYear}-${month}-${day}`);
+          return date.toLocaleDateString('en-GB', {
+            weekday: 'long',
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric'
+          });
+        } catch (e) {
+          console.error('Error formatting date:', dateStr, e);
+          return dateStr;
+        }
       }
 
       function parseExamDate(dateStr) {
         if (!dateStr) return null;
-        const [day, month, year] = dateStr.split('/');
-        const fullYear = '20' + year;
-        return new Date(`${fullYear}-${month}-${day}`);
+        try {
+          const [day, month, year] = dateStr.split('/');
+          const fullYear = year.length === 2 ? '20' + year : year;
+          const date = new Date(`${fullYear}-${month}-${day}T00:00:00Z`);
+          return date.getTime() ? date : null; // Check if valid date
+        } catch (e) {
+          console.error('Error parsing date:', dateStr, e);
+          return null;
+        }
+      }
+
+      function getWeekNumber(date) {
+        if (!date) return null;
+        // Copy date to avoid modifying original
+        const d = new Date(date);
+        // Set to nearest Thursday (makes week number consistent)
+        d.setHours(0, 0, 0, 0);
+        d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+        // Get first day of year
+        const yearStart = new Date(d.getFullYear(), 0, 1);
+        // Calculate week number: Math.ceil((current - yearStart) / 86400000 / 7)
+        return Math.ceil((d - yearStart) / 86400000 / 7);
       }
 
       function getExamStatus(examDate) {
@@ -161,14 +408,21 @@
         const examTime = parseExamDate(examDate);
         if (!examTime) return '';
         
-        if (examTime.toDateString() === CURRENT_DATE.toDateString()) {
+        // Set both dates to start of day for comparison
+        const examDay = new Date(examTime);
+        examDay.setHours(0, 0, 0, 0);
+        
+        const today = new Date(CURRENT_DATE);
+        today.setHours(0, 0, 0, 0);
+        
+        if (examDay.getTime() === today.getTime()) {
           return 'today';
         }
         
-        const sevenDays = new Date(CURRENT_DATE);
+        const sevenDays = new Date(today);
         sevenDays.setDate(sevenDays.getDate() + 7);
         
-        if (examTime > CURRENT_DATE && examTime <= sevenDays) {
+        if (examDay > today && examDay <= sevenDays) {
           return 'upcoming';
         }
         
@@ -180,7 +434,15 @@
         const examTime = parseExamDate(examDate);
         if (!examTime) return '';
         
-        const diffTime = examTime - CURRENT_DATE;
+        // Set both dates to start of day for comparison
+        const examDay = new Date(examTime);
+        examDay.setHours(0, 0, 0, 0);
+        
+        const today = new Date(CURRENT_DATE);
+        today.setHours(0, 0, 0, 0);
+        
+        // Calculate difference in days
+        const diffTime = examDay - today;
         if (diffTime < 0) return '';
         
         const days = Math.floor(diffTime / (1000 * 60 * 60 * 24));
@@ -191,18 +453,22 @@
 
       function groupExamsByWeek(exams) {
         const weeks = {};
+        const currentWeekNum = getWeekNumber(CURRENT_DATE);
+        
         exams.forEach(exam => {
           const week = exam.Week || 'Unscheduled';
           if (!weeks[week]) {
+            const examDate = parseExamDate(exam.Date);
+            const examWeekNum = examDate ? getWeekNumber(examDate) : null;
+            
             weeks[week] = {
               exams: [],
-              isCurrent: exam.Date && 
-                        parseExamDate(exam.Date)?.toISOString().slice(0, 7) === 
-                        CURRENT_DATE.toISOString().slice(0, 7)
+              isCurrent: examWeekNum && currentWeekNum && examWeekNum === currentWeekNum
             };
           }
           weeks[week].exams.push(exam);
         });
+        
         return weeks;
       }
 
@@ -218,15 +484,29 @@
               ${exams.map(exam => {
                 const status = getExamStatus(exam.Date);
                 const countdown = calculateCountdown(exam.Date);
+                
+                // Get the exam date for data attribute
+                let examMonth = '';
+                if (exam.Date) {
+                  const date = parseExamDate(exam.Date);
+                  if (date) {
+                    examMonth = date.getMonth() + 1;
+                  }
+                }
+                
                 return `
-                  <div class="exam-card ${status}">
+                  <div class="exam-card ${status}" data-date="${exam.Date || ''}" data-status="${status || 'future'}">
                     <div class="exam-date">${formatDate(exam.Date)}</div>
                     <div class="h5 mb-1">${exam.Subject}</div>
-                    <div class="text-light">${exam.Board}</div>
+                    <div class="board-badge">${exam.Board}</div>
                     <div class="exam-time">
-                      Time: ${exam.Time || 'TBC'}<br>
-                      Length: ${exam.Length || 'TBC'}
+                      <i class="far fa-clock"></i> Time: ${exam.Time || 'TBC'}<br>
+                      <i class="fas fa-hourglass-half"></i> Length: ${exam.Length || 'TBC'}
                     </div>
+                    ${exam.Room ? `
+                    <div class="exam-details">
+                      <i class="fas fa-map-marker-alt"></i> Room: ${exam.Room}
+                    </div>` : ''}
                     ${countdown ? `<div class="countdown mt-2">${countdown}</div>` : ''}
                   </div>
                 `;
@@ -236,35 +516,172 @@
         `;
       }
 
+      function setupFilters() {
+        const filterContainer = document.getElementById('filter-container');
+        filterContainer.style.display = 'flex';
+        
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            // Remove active class from all buttons
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            const filter = this.getAttribute('data-filter');
+            const examCards = document.querySelectorAll('.exam-card');
+            
+            examCards.forEach(card => {
+              if (filter === 'all') {
+                card.style.display = '';
+              } else if (filter === 'upcoming') {
+                card.style.display = card.classList.contains('upcoming') ? '' : 'none';
+              } else if (filter === 'today') {
+                card.style.display = card.classList.contains('today') ? '' : 'none';
+              } else if (filter === 'past') {
+                // Get exam date
+                const dateStr = card.getAttribute('data-date');
+                if (!dateStr) {
+                  card.style.display = 'none';
+                  return;
+                }
+                
+                const examDate = parseExamDate(dateStr);
+                if (!examDate) {
+                  card.style.display = 'none';
+                  return;
+                }
+                
+                const today = new Date(CURRENT_DATE);
+                today.setHours(0, 0, 0, 0);
+                
+                examDate.setHours(0, 0, 0, 0);
+                
+                card.style.display = examDate < today ? '' : 'none';
+              }
+            });
+          });
+        });
+      }
+
+      function updateStatistics(exams) {
+        const statsContainer = document.getElementById('stats-container');
+        statsContainer.style.display = 'block';
+        
+        // Show exam info
+        document.getElementById('exam-info').style.display = 'block';
+        
+        // Calculate statistics
+        const totalExams = exams.length;
+        const uniqueSubjects = [...new Set(exams.map(exam => exam.Subject))].length;
+        
+        // Completed exams
+        const completedExams = exams.filter(exam => {
+          if (!exam.Date) return false;
+          const examDate = parseExamDate(exam.Date);
+          if (!examDate) return false;
+          
+          const today = new Date(CURRENT_DATE);
+          today.setHours(0, 0, 0, 0);
+          
+          examDate.setHours(0, 0, 0, 0);
+          
+          return examDate < today;
+        }).length;
+        
+        // Find next exam
+        let nextExam = null;
+        let daysToNext = 0;
+        
+        const today = new Date(CURRENT_DATE);
+        today.setHours(0, 0, 0, 0);
+        
+        exams.forEach(exam => {
+          if (!exam.Date) return;
+          
+          const examDate = parseExamDate(exam.Date);
+          if (!examDate) return;
+          
+          examDate.setHours(0, 0, 0, 0);
+          
+          if (examDate >= today) {
+            if (!nextExam) {
+              nextExam = exam;
+              daysToNext = Math.floor((examDate - today) / (1000 * 60 * 60 * 24));
+            } else {
+              const currentNextDate = parseExamDate(nextExam.Date);
+              currentNextDate.setHours(0, 0, 0, 0);
+              
+              if (examDate < currentNextDate) {
+                nextExam = exam;
+                daysToNext = Math.floor((examDate - today) / (1000 * 60 * 60 * 24));
+              }
+            }
+          }
+        });
+        
+        // Update statistics display
+        document.getElementById('total-exams').textContent = totalExams;
+        document.getElementById('unique-subjects').textContent = uniqueSubjects;
+        document.getElementById('completed-exams').textContent = completedExams;
+        document.getElementById('days-to-next').textContent = daysToNext;
+        
+        // Update next exam alert
+        const nextExamAlert = document.getElementById('next-exam-alert');
+        
+        if (nextExam) {
+          document.getElementById('next-exam-title').textContent = 
+            daysToNext === 0 ? 'You have an exam today!' : 
+            daysToNext === 1 ? 'You have an exam tomorrow!' : 
+            `Your next exam is in ${daysToNext} days`;
+          
+          document.getElementById('next-exam-details').textContent = 
+            `${nextExam.Subject} (${nextExam.Board}) - ${formatDate(nextExam.Date)}, ${nextExam.Time || 'Time TBC'}`;
+          
+          nextExamAlert.style.display = 'block';
+        } else {
+          nextExamAlert.style.display = 'none';
+        }
+      }
+
       async function loadUserExams() {
+        hideError();
+        document.getElementById('loading-message').style.display = 'block';
+        
         try {
-          const { data: { session } } = await supabase.auth.getSession();
+          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+          
+          if (sessionError) {
+            throw { message: sessionError.message, status: sessionError.status || 500 };
+          }
           
           if (!session) {
-            window.location.href = 'login.html';
-            return;
+            throw { message: 'No active session found. Please log in.', status: 401 };
           }
-        updateUserInfo(session);
+          
+          updateUserInfo(session.user.email || 'Valinor-70');
 
-        document.getElementById('loading-message').style.display = 'block';
-
-          document.getElementById('loading-message').style.display = 'block';
           const weeksContainer = document.getElementById('weeks-container');
           const noExamsMessage = document.getElementById('no-exams-message');
           
+          // KEEPING ORIGINAL SQL/QUERY STRUCTURE EXACTLY AS IS
           const { data: userExams, error: userExamsError } = await supabase
             .from('user_exams')
             .select('exam_id')
             .eq('user_id', session.user.id);
 
-          if (userExamsError) throw userExamsError;
+          if (userExamsError) {
+            throw { message: userExamsError.message, status: userExamsError.status || 500 };
+          }
 
           const { data: allExams, error: examsError } = await supabase
             .from('gcsedata')
             .select('*')
             .order('Date', { ascending: true });
 
-          if (examsError) throw examsError;
+          if (examsError) {
+            throw { message: examsError.message, status: examsError.status || 500 };
+          }
 
           document.getElementById('loading-message').style.display = 'none';
 
@@ -280,44 +697,59 @@
           weeksContainer.style.display = 'block';
           noExamsMessage.style.display = 'none';
 
+          // Group by week (keeping original structure)
           const weeklyExams = groupExamsByWeek(userActiveExams);
           weeksContainer.innerHTML = Object.entries(weeklyExams)
             .sort(([a], [b]) => a.localeCompare(b))
             .map(([week, data]) => renderWeek(week, data))
             .join('');
+            
+          // Setup filtering and statistics
+          setupFilters();
+          updateStatistics(userActiveExams);
 
         } catch (err) {
           console.error('Error loading exams:', err);
-          alert('Error loading your timetable. Please try again.');
+          showError(err);
         }
       }
 
       document.addEventListener('DOMContentLoaded', () => {
-    loadUserExams();
-    
-    // Set up auto-updating datetime
-    updateDateTime(); // Initial update
-    setInterval(updateDateTime, 1000); // Update every second
+        // Initialize with provided values
+        updateDateTime();
+        updateUserInfo('Valinor-70');
+        
+        // Try to load exams
+        loadUserExams();
+        
+        // Event listeners
+        ['select-exams-btn', 'select-exams-btn-main'].forEach(btnId => {
+            const btn = document.getElementById(btnId);
+            if (btn) {
+                btn.addEventListener('click', () => {
+                    window.location.href = 'select-exams.html';
+                });
+            }
+        });
 
-    ['select-exams-btn', 'select-exams-btn-main'].forEach(btnId => {
-        const btn = document.getElementById(btnId);
-        if (btn) {
-            btn.addEventListener('click', () => {
-                window.location.href = 'select-exams.html';
-            });
-        }
-    });
-
-    document.getElementById('logout-btn').addEventListener('click', async () => {
-        try {
-            await supabase.auth.signOut();
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            try {
+                await supabase.auth.signOut();
+                window.location.href = 'login.html';
+            } catch (err) {
+                console.error('Logout error:', err);
+                showError('Error logging out. Please try again.');
+            }
+        });
+        
+        document.getElementById('retry-btn').addEventListener('click', () => {
+            loadUserExams();
+        });
+        
+        document.getElementById('to-login-btn').addEventListener('click', () => {
             window.location.href = 'login.html';
-        } catch (err) {
-            console.error('Logout error:', err);
-            alert('Error logging out. Please try again.');
-        }
-    });
-});
+        });
+      });
     </script>
   </body>
 </html>
