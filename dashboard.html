@@ -8,12 +8,62 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css" />
     <style>
+      body {
+        background-color: #282c34;
+        background-image: url(images/bg.jpg);
+        background-size: cover;
+        background-attachment: fixed;
+        color: white;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+      
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      /* Tab navigation styling */
+      .tab-navigation {
+        margin: 20px 0;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      
+      .tab-navigation .nav-link {
+        color: white;
+        padding: 15px 20px;
+        border-radius: 0;
+        transition: all 0.3s;
+      }
+      
+      .tab-navigation .nav-link.active {
+        background-color: rgba(255, 215, 0, 0.2);
+        color: #ffd700;
+        font-weight: bold;
+      }
+      
+      .tab-navigation .nav-link:hover:not(.active) {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+      
+      .tab-content > .tab-pane {
+        display: none;
+      }
+      
+      .tab-content > .active {
+        display: block;
+      }
+
+      /* Card styling */
       .week-container {
         background: rgba(255, 255, 255, 0.1);
         border-radius: 10px;
         margin-bottom: 20px;
         overflow: hidden;
       }
+      
       .week-header {
         background: rgba(0, 0, 0, 0.3);
         padding: 10px 15px;
@@ -23,15 +73,18 @@
         justify-content: space-between;
         align-items: center;
       }
+      
       .current-week {
         background: rgba(25, 135, 84, 0.3);
       }
+      
       .exam-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
         gap: 15px;
         padding: 15px;
       }
+      
       .exam-card {
         background: rgba(255, 255, 255, 0.05);
         border-radius: 8px;
@@ -39,57 +92,191 @@
         color: white;
         transition: transform 0.2s;
       }
+      
       .exam-card:hover {
         transform: translateY(-2px);
         background: rgba(255, 255, 255, 0.1);
       }
-      .exam-card.upcoming {
+      
+      .exam-card.red {
+        border-left: 4px solid #ff4d4d;
+        background-color: rgba(255, 0, 0, 0.2);
+      }
+      
+      .exam-card.orange {
+        border-left: 4px solid #ffa500;
+        background-color: rgba(255, 165, 0, 0.2);
+      }
+      
+      .exam-card.yellow {
         border-left: 4px solid #ffd700;
+        background-color: rgba(255, 215, 0, 0.2);
       }
-      .exam-card.today {
+      
+      .exam-card.green {
         border-left: 4px solid #00ff00;
+        background-color: rgba(0, 255, 0, 0.2);
       }
+      
       .exam-date {
         color: #ffd700;
         font-weight: bold;
       }
+      
       .exam-time {
         color: #98fb98;
       }
+      
+      /* Controls container */
       .controls-container {
         background: rgba(0, 0, 0, 0.5);
         padding: 15px;
         border-radius: 10px;
         margin-bottom: 20px;
       }
+      
       .datetime-display {
         color: #98fb98;
         font-family: monospace;
         font-size: 1.1em;
       }
+      
       .user-info {
         color: #ffd700;
       }
+      
       .countdown {
+        margin-top: 8px;
         font-size: 0.9em;
         color: #ff9999;
       }
-      .error-message {
-        background: rgba(220, 53, 69, 0.2);
-        color: #ff6b6b;
-        padding: 15px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        display: none;
+      
+      .exact-countdown {
+        font-weight: bold;
+        color: #ff9999;
       }
-      /* New styles for enhanced UI */
+      
+      /* Revision timetable styling */
+      .revision-container {
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      
+      .revision-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+      
+      .revision-table {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      
+      .revision-table th {
+        background: rgba(0, 0, 0, 0.4);
+        color: #ffd700;
+        padding: 12px;
+        text-align: left;
+      }
+      
+      .revision-table td {
+        padding: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      
+      .revision-table tr:last-child td {
+        border-bottom: none;
+      }
+      
+      .revision-priority {
+        display: inline-block;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 25px;
+        font-weight: bold;
+        margin-right: 8px;
+      }
+      
+      .priority-high {
+        background-color: #ff4d4d;
+      }
+      
+      .priority-medium {
+        background-color: #ffa500;
+      }
+      
+      .priority-low {
+        background-color: #ffd700;
+      }
+      
+      .priority-none {
+        background-color: #00ff00;
+      }
+      
+      /* Hardness settings */
+      .hardness-container {
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      
+      .hardness-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 15px;
+      }
+      
+      .hardness-item {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        padding: 15px;
+        transition: transform 0.2s;
+      }
+      
+      .hardness-item:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.1);
+      }
+      
+      .hardness-controls {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+      }
+      
+      .hardness-rating {
+        display: flex;
+        margin-right: 10px;
+      }
+      
+      .hardness-star {
+        color: #aaa;
+        cursor: pointer;
+        font-size: 1.5rem;
+        transition: color 0.2s;
+      }
+      
+      .hardness-star.active {
+        color: #ffd700;
+      }
+      
+      /* Stats Section */
       .stats-container {
         background: rgba(0, 0, 0, 0.4);
         border-radius: 10px;
         padding: 15px;
         margin-bottom: 20px;
-        display: none;
       }
+      
       .stat-card {
         background: rgba(255, 255, 255, 0.05);
         border-radius: 8px;
@@ -97,41 +284,53 @@
         text-align: center;
         transition: transform 0.2s;
       }
+      
       .stat-card:hover {
         transform: translateY(-3px);
         background: rgba(255, 255, 255, 0.1);
       }
+      
       .stat-value {
         font-size: 2rem;
         font-weight: bold;
         color: #ffd700;
       }
+      
       .stat-label {
         color: #98fb98;
         text-transform: uppercase;
         font-size: 0.9rem;
         margin-top: 5px;
       }
-      .filter-container {
+      
+      /* Loading state */
+      .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
         display: flex;
-        flex-wrap: wrap;
-        margin-bottom: 20px;
-        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
       }
-      .filter-btn {
-        background: rgba(255, 255, 255, 0.1);
-        border: none;
-        color: white;
-        padding: 8px 15px;
-        border-radius: 20px;
-        margin-right: 10px;
-        margin-bottom: 10px;
-        transition: all 0.2s;
+      
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: #ffd700;
+        animation: spin 1s ease-in-out infinite;
       }
-      .filter-btn:hover, .filter-btn.active {
-        background: rgba(255, 215, 0, 0.3);
-        color: #ffd700;
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
       }
+      
+      /* Next exam alert */
       .next-exam-alert {
         background: rgba(255, 215, 0, 0.15);
         border-left: 4px solid #ffd700;
@@ -139,226 +338,225 @@
         border-radius: 8px;
         margin-bottom: 20px;
         color: white;
-        display: none;
-      }
-      .exam-icon {
-        margin-right: 8px;
-        color: #ffd700;
-      }
-      .board-badge {
-        font-size: 0.85rem;
-        padding: 3px 8px;
-        background: rgba(0, 0, 0, 0.3);
-        border-radius: 4px;
-        display: inline-block;
-        margin-top: 5px;
-        color: #98fb98;
-      }
-      .exam-details {
-        margin-top: 10px;
-        font-size: 0.9rem;
-        color: rgba(255, 255, 255, 0.7);
-      }
-      .exam-info {
-        background: rgba(0, 0, 0, 0.4);
-        border-radius: 10px;
-        padding: 15px;
-        margin-bottom: 20px;
-        color: white;
-        display: none;
-      }
-      .exam-info h4 {
-        color: #ffd700;
-        margin-bottom: 15px;
-      }
-      .exam-info ul {
-        list-style-type: none;
-        padding-left: 0;
-      }
-      .exam-info li {
-        padding: 5px 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      }
-      .exam-info li:last-child {
-        border-bottom: none;
-      }
-      .exam-info i {
-        color: #98fb98;
-        margin-right: 10px;
       }
     </style>
   </head>
-  <body class="img js-fullheight" style="background-image: url(images/bg.jpg);">
-    <section class="ftco-section">
-      <div class="container">
-        <!-- Controls -->
-        <div class="controls-container">
-          <div class="d-flex justify-content-between align-items-center flex-wrap">
-            <div>
-              <h2 class="text-white mb-2">My GCSE Timetable</h2>
-              <div class="user-info mb-1">Current User: Valinor-70</div>
-              <div class="datetime-display">
-                Current Date and Time (UTC - YYYY-MM-DD HH:MM:SS formatted): 2025-05-07 15:20:26
-              </div>
+  <body>
+    <div class="loading-overlay" id="loading-overlay">
+      <div class="loading-spinner"></div>
+    </div>
+
+    <div class="container my-4">
+      <!-- Controls -->
+      <div class="controls-container">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+          <div>
+            <h2 class="text-white mb-2">My GCSE Timetable</h2>
+            <div class="user-info mb-1" id="user-info">Current User: Loading...</div>
+            <div class="datetime-display" id="datetime-display">
+              Current Date and Time: Loading...
             </div>
-            <div>
-              <button id="select-exams-btn" class="btn btn-primary me-2">Select Exams</button>
-              <button id="logout-btn" class="btn btn-danger">Logout</button>
+          </div>
+          <div>
+            <button id="select-exams-btn" class="btn btn-primary me-2">Select Exams</button>
+            <button id="logout-btn" class="btn btn-danger">Logout</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Next Exam Alert -->
+      <div id="next-exam-alert" class="next-exam-alert">
+        <div class="d-flex align-items-center">
+          <i class="fas fa-bell fa-lg me-3"></i>
+          <div>
+            <h5 class="mb-1" id="next-exam-title">Loading next exam...</h5>
+            <p class="mb-0" id="next-exam-details"></p>
+            <p class="mb-0 mt-2 exact-countdown" id="exact-countdown"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistics Overview -->
+      <div class="stats-container mb-4">
+        <div class="row">
+          <div class="col-md-3 col-6 mb-3">
+            <div class="stat-card">
+              <div><i class="fas fa-calendar-day fa-2x mb-2" style="color: #98fb98;"></i></div>
+              <div class="stat-value" id="total-exams">0</div>
+              <div class="stat-label">Total Exams</div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6 mb-3">
+            <div class="stat-card">
+              <div><i class="fas fa-book fa-2x mb-2" style="color: #98fb98;"></i></div>
+              <div class="stat-value" id="unique-subjects">0</div>
+              <div class="stat-label">Subjects</div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6 mb-3">
+            <div class="stat-card">
+              <div><i class="fas fa-hourglass-start fa-2x mb-2" style="color: #98fb98;"></i></div>
+              <div class="stat-value" id="days-to-next">0</div>
+              <div class="stat-label">Days to Next</div>
+            </div>
+          </div>
+          <div class="col-md-3 col-6 mb-3">
+            <div class="stat-card">
+              <div><i class="fas fa-check-circle fa-2x mb-2" style="color: #98fb98;"></i></div>
+              <div class="stat-value" id="completed-exams">0</div>
+              <div class="stat-label">Completed</div>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Stats Overview -->
-        <div id="stats-container" class="stats-container">
-          <div class="row">
-            <div class="col-md-3 col-6 mb-3">
-              <div class="stat-card">
-                <div><i class="fas fa-calendar-day fa-2x mb-2" style="color: #98fb98;"></i></div>
-                <div class="stat-value" id="total-exams">0</div>
-                <div class="stat-label">Total Exams</div>
-              </div>
-            </div>
-            <div class="col-md-3 col-6 mb-3">
-              <div class="stat-card">
-                <div><i class="fas fa-book fa-2x mb-2" style="color: #98fb98;"></i></div>
-                <div class="stat-value" id="unique-subjects">0</div>
-                <div class="stat-label">Subjects</div>
-              </div>
-            </div>
-            <div class="col-md-3 col-6 mb-3">
-              <div class="stat-card">
-                <div><i class="fas fa-hourglass-start fa-2x mb-2" style="color: #98fb98;"></i></div>
-                <div class="stat-value" id="days-to-next">0</div>
-                <div class="stat-label">Days to Next</div>
-              </div>
-            </div>
-            <div class="col-md-3 col-6 mb-3">
-              <div class="stat-card">
-                <div><i class="fas fa-check-circle fa-2x mb-2" style="color: #98fb98;"></i></div>
-                <div class="stat-value" id="completed-exams">0</div>
-                <div class="stat-label">Completed</div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <!-- Tab Navigation -->
+      <ul class="nav nav-tabs tab-navigation" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="timetable-tab" data-bs-toggle="tab" data-bs-target="#timetable" type="button" role="tab" aria-controls="timetable" aria-selected="true">
+            <i class="fas fa-calendar-alt me-2"></i>Timetable
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="revision-tab" data-bs-toggle="tab" data-bs-target="#revision" type="button" role="tab" aria-controls="revision" aria-selected="false">
+            <i class="fas fa-tasks me-2"></i>Revision Plan
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="hardness-tab" data-bs-toggle="tab" data-bs-target="#hardness" type="button" role="tab" aria-controls="hardness" aria-selected="false">
+            <i class="fas fa-sliders-h me-2"></i>Set Hardness
+          </button>
+        </li>
+      </ul>
 
-        <!-- Filter Buttons -->
-        <div id="filter-container" class="filter-container">
-          <button class="filter-btn active" data-filter="all"><i class="fas fa-list"></i> All Exams</button>
-          <button class="filter-btn" data-filter="upcoming"><i class="fas fa-hourglass-start"></i> Upcoming (7 days)</button>
-          <button class="filter-btn" data-filter="today"><i class="fas fa-calendar-day"></i> Today</button>
-          <button class="filter-btn" data-filter="past"><i class="fas fa-history"></i> Past Exams</button>
-        </div>
-
-        <!-- Next Exam Alert -->
-        <div id="next-exam-alert" class="next-exam-alert">
-          <div class="d-flex align-items-center">
-            <i class="fas fa-bell fa-lg me-3"></i>
-            <div>
-              <h5 class="mb-1" id="next-exam-title">Your next exam is soon</h5>
-              <p class="mb-0" id="next-exam-details"></p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Error message -->
-        <div id="error-message" class="error-message">
-          <strong>Error:</strong> <span id="error-text"></span>
-          <div class="mt-2">
-            <button id="retry-btn" class="btn btn-sm btn-light me-2">Retry</button>
-            <button id="to-login-btn" class="btn btn-sm btn-secondary">Go to Login</button>
-          </div>
-        </div>
-
-        <!-- Exam Content -->
-        <div id="exam-content">
-          <!-- Loading message -->
-          <div id="loading-message" class="text-center text-white my-4 p-4" 
-               style="background: rgba(0, 0, 0, 0.5); border-radius: 10px;">
+      <div class="tab-content" id="myTabContent">
+        <!-- Timetable Tab -->
+        <div class="tab-pane fade show active" id="timetable" role="tabpanel" aria-labelledby="timetable-tab">
+          <div id="loading-message" class="text-center my-4 p-4" style="display: none; background: rgba(0, 0, 0, 0.5); border-radius: 10px;">
             Loading your timetable...
           </div>
 
-          <!-- No exams message -->
-          <div id="no-exams-message" class="text-center text-white my-4 p-5" 
-               style="display: none; background: rgba(0, 0, 0, 0.5); border-radius: 10px;">
+          <div id="no-exams-message" class="text-center my-4 p-5" style="display: none; background: rgba(0, 0, 0, 0.5); border-radius: 10px;">
             <h4>No exams selected yet!</h4>
             <p class="mb-4">Please select the exams you're taking to see your schedule.</p>
             <button id="select-exams-btn-main" class="btn btn-primary btn-lg">Select My Exams</button>
           </div>
 
-          <!-- Weeks container -->
           <div id="weeks-container"></div>
         </div>
 
-        <!-- Exam Info -->
-        <div id="exam-info" class="exam-info">
-          <h4><i class="fas fa-info-circle"></i> Exam Information</h4>
-          <ul>
-            <li><i class="fas fa-graduation-cap"></i> Bring your candidate ID card to all exams</li>
-            <li><i class="fas fa-clock"></i> Arrive at least 15 minutes before the exam start time</li>
-            <li><i class="fas fa-pen"></i> Bring black pens, pencils, and other required equipment</li>
-            <li><i class="fas fa-mobile-alt"></i> Mobile phones and smart watches must be turned off and stored away</li>
-            <li><i class="fas fa-calendar-check"></i> Check your timetable regularly for any updates</li>
-          </ul>
+        <!-- Revision Tab -->
+        <div class="tab-pane fade" id="revision" role="tabpanel" aria-labelledby="revision-tab">
+          <div class="revision-container">
+            <div class="revision-header">
+              <h4><i class="fas fa-tasks me-2"></i>Revision Timetable</h4>
+              <button id="generate-revision-btn" class="btn btn-warning">
+                <i class="fas fa-sync-alt me-2"></i>Generate Plan
+              </button>
+            </div>
+            
+            <div class="alert alert-info">
+              <i class="fas fa-info-circle me-2"></i> 
+              Your revision plan is based on exam proximity and subject difficulty ratings you've provided.
+            </div>
+            
+            <div id="revision-loading" class="text-center py-4" style="display: none;">
+              <div class="spinner-border text-warning" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="mt-2">Generating your personalized revision plan...</p>
+            </div>
+            
+            <div id="no-revision-data" class="alert alert-warning" style="display: none;">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              Please rate the hardness of your exams in the "Set Hardness" tab first.
+            </div>
+            
+            <div id="revision-table-container" style="display: none;">
+              <table class="revision-table" id="revision-table">
+                <thead>
+                  <tr>
+                    <th>Priority</th>
+                    <th>Subject</th>
+                    <th>Date</th>
+                    <th>Days Until</th>
+                    <th>Hardness</th>
+                    <th>Daily Hours</th>
+                  </tr>
+                </thead>
+                <tbody id="revision-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hardness Tab -->
+        <div class="tab-pane fade" id="hardness" role="tabpanel" aria-labelledby="hardness-tab">
+          <div class="hardness-container">
+            <h4 class="mb-3"><i class="fas fa-sliders-h me-2"></i>Rate Exam Difficulty</h4>
+            <p class="mb-4">Rate each exam's difficulty from 1 (Easy) to 5 (Very Hard) to help optimize your revision timetable.</p>
+            
+            <div id="hardness-loading" class="text-center py-4">
+              <div class="spinner-border text-warning" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="mt-2">Loading your exams...</p>
+            </div>
+            
+            <div id="hardness-list" class="hardness-list"></div>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
       import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
       const SUPABASE_URL = 'https://rcrsslbqoukogbvdvwrz.supabase.co';
       const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJjcnNzbGJxb3Vrb2didmR2d3J6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2OTM5MTUsImV4cCI6MjA1NDI2OTkxNX0.11uWp9T-q2Zw2qcj19Z6ahmXc_aXTf0oUZsdIKkW_dQ';
-
       const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      let CURRENT_DATE = new Date('2025-05-07T15:20:26Z'); // Updated to the requested date
       
-      function formatDateTime(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-        
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-      }
+      // Global variables
+      let CURRENT_DATE = new Date();
+      let USER_EXAMS = [];
+      let HARDNESS_DATA = {};
+      let NEXT_EXAM = null;
+      let TIMER_INTERVAL;
       
-      function updateDateTime() {
-        // For real-time use, uncomment this line:
-        // CURRENT_DATE = new Date();
-        
-        // Using the fixed date for demonstration
-        document.querySelector('.datetime-display').textContent = 
-          `Current Date and Time (UTC - YYYY-MM-DD HH:MM:SS formatted): ${formatDateTime(CURRENT_DATE)}`;
-      }
-
-      function updateUserInfo(username = 'Valinor-70') {
-        document.querySelector('.user-info').textContent = 
-          `Current User: ${username}`;
-      }
+      // DOM Elements
+      const loadingOverlay = document.getElementById('loading-overlay');
+      const datetimeDisplay = document.getElementById('datetime-display');
+      const userInfoDisplay = document.getElementById('user-info');
+      const exactCountdown = document.getElementById('exact-countdown');
+      const weeksContainer = document.getElementById('weeks-container');
+      const noExamsMessage = document.getElementById('no-exams-message');
+      const loadingMessage = document.getElementById('loading-message');
+      const nextExamAlert = document.getElementById('next-exam-alert');
+      const nextExamTitle = document.getElementById('next-exam-title');
+      const nextExamDetails = document.getElementById('next-exam-details');
       
-      function showError(error) {
-        const errorElement = document.getElementById('error-message');
-        const errorTextElement = document.getElementById('error-text');
-        
-        let errorMessage = error;
-        if (typeof error === 'object') {
-          errorMessage = error.message || 'Unknown error occurred';
-          if (error.status === 401) {
-            errorMessage = 'Authentication error. Please log in again. (ERROR CODE 401)';
-          }
-        }
-        
-        errorTextElement.textContent = errorMessage;
-        errorElement.style.display = 'block';
-        document.getElementById('loading-message').style.display = 'none';
-      }
+      // Stats elements
+      const totalExamsElement = document.getElementById('total-exams');
+      const uniqueSubjectsElement = document.getElementById('unique-subjects');
+      const daysToNextElement = document.getElementById('days-to-next');
+      const completedExamsElement = document.getElementById('completed-exams');
       
-      function hideError() {
-        document.getElementById('error-message').style.display = 'none';
-      }
+      // Revision elements
+      const revisionTableContainer = document.getElementById('revision-table-container');
+      const revisionLoading = document.getElementById('revision-loading');
+      const noRevisionData = document.getElementById('no-revision-data');
+      const revisionTbody = document.getElementById('revision-tbody');
       
+      // Hardness elements
+      const hardnessList = document.getElementById('hardness-list');
+      const hardnessLoading = document.getElementById('hardness-loading');
+      
+      /**
+       * Format date for display
+       * @param {string} dateStr - Date string in format "DD/MM/YY"
+       * @returns {string} Formatted date string
+       */
       function formatDate(dateStr) {
         if (!dateStr) return 'TBC';
         const [day, month, year] = dateStr.split('/');
@@ -376,7 +574,12 @@
           return dateStr;
         }
       }
-
+      
+      /**
+       * Parse exam date string to Date object
+       * @param {string} dateStr - Date string in format "DD/MM/YY"
+       * @returns {Date|null} Date object or null if invalid
+       */
       function parseExamDate(dateStr) {
         if (!dateStr) return null;
         try {
@@ -389,53 +592,18 @@
           return null;
         }
       }
-
-      function getWeekNumber(date) {
-        if (!date) return null;
-        // Copy date to avoid modifying original
-        const d = new Date(date);
-        // Set to nearest Thursday (makes week number consistent)
-        d.setHours(0, 0, 0, 0);
-        d.setDate(d.getDate() + 4 - (d.getDay() || 7));
-        // Get first day of year
-        const yearStart = new Date(d.getFullYear(), 0, 1);
-        // Calculate week number: Math.ceil((current - yearStart) / 86400000 / 7)
-        return Math.ceil((d - yearStart) / 86400000 / 7);
-      }
-
-      function getExamStatus(examDate) {
-        if (!examDate) return '';
-        const examTime = parseExamDate(examDate);
-        if (!examTime) return '';
+      
+      /**
+       * Calculate days until exam
+       * @param {string} dateStr - Date string in format "DD/MM/YY"
+       * @returns {number|null} Days until exam or null if invalid
+       */
+      function calculateDaysUntil(dateStr) {
+        const examDate = parseExamDate(dateStr);
+        if (!examDate) return null;
         
         // Set both dates to start of day for comparison
-        const examDay = new Date(examTime);
-        examDay.setHours(0, 0, 0, 0);
-        
-        const today = new Date(CURRENT_DATE);
-        today.setHours(0, 0, 0, 0);
-        
-        if (examDay.getTime() === today.getTime()) {
-          return 'today';
-        }
-        
-        const sevenDays = new Date(today);
-        sevenDays.setDate(sevenDays.getDate() + 7);
-        
-        if (examDay > today && examDay <= sevenDays) {
-          return 'upcoming';
-        }
-        
-        return '';
-      }
-
-      function calculateCountdown(examDate) {
-        if (!examDate) return '';
-        const examTime = parseExamDate(examDate);
-        if (!examTime) return '';
-        
-        // Set both dates to start of day for comparison
-        const examDay = new Date(examTime);
+        const examDay = new Date(examDate);
         examDay.setHours(0, 0, 0, 0);
         
         const today = new Date(CURRENT_DATE);
@@ -443,37 +611,132 @@
         
         // Calculate difference in days
         const diffTime = examDay - today;
-        if (diffTime < 0) return '';
-        
-        const days = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-        if (days === 0) return 'Today!';
-        if (days === 1) return 'Tomorrow!';
-        return `${days} days away`;
+        return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       }
-
+      
+      /**
+       * Get exam highlight class based on days until exam
+       * @param {number} daysUntil - Days until exam
+       * @returns {string} CSS class name
+       */
+      function getExamHighlightClass(daysUntil) {
+        if (daysUntil <= 2) return 'red';
+        if (daysUntil <= 5) return 'orange';
+        if (daysUntil <= 7) return 'yellow';
+        return 'green';
+      }
+      
+      /**
+       * Update date and time display
+       */
+      function updateDateTime() {
+        CURRENT_DATE = new Date();
+        const formattedDate = CURRENT_DATE.toISOString().replace('T', ' ').substring(0, 19);
+        datetimeDisplay.textContent = `Current Date and Time (UTC - YYYY-MM-DD HH:MM:SS formatted): ${formattedDate}`;
+        
+        // Update exact countdown to next exam if available
+        updateExactCountdown();
+      }
+      
+      /**
+       * Calculate and display exact countdown to next exam
+       */
+      function updateExactCountdown() {
+        if (!NEXT_EXAM || !NEXT_EXAM.Date) {
+          exactCountdown.textContent = '';
+          return;
+        }
+        
+        const examDate = parseExamDate(NEXT_EXAM.Date);
+        if (!examDate) {
+          exactCountdown.textContent = '';
+          return;
+        }
+        
+        // Set exam time if available, default to 9:00 AM
+        let examDateTime = new Date(examDate);
+        if (NEXT_EXAM.Time && NEXT_EXAM.Time.toLowerCase().includes('am')) {
+          examDateTime.setHours(9, 0, 0, 0);
+        } else if (NEXT_EXAM.Time && NEXT_EXAM.Time.toLowerCase().includes('pm')) {
+          examDateTime.setHours(13, 0, 0, 0);
+        } else {
+          examDateTime.setHours(9, 0, 0, 0);
+        }
+        
+        // Calculate time difference
+        const now = new Date();
+        const diffMs = examDateTime - now;
+        
+        if (diffMs <= 0) {
+          exactCountdown.textContent = 'Exam has started!';
+          return;
+        }
+        
+        // Calculate days, hours, minutes, seconds
+        const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+        
+        exactCountdown.textContent = `Countdown: ${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`;
+      }
+      
+      /**
+       * Update user info display
+       * @param {string} username - User's username
+       */
+      function updateUserInfo(username = 'Valinor-70') {
+        userInfoDisplay.textContent = `Current User: ${username}`;
+      }
+      
+      /**
+       * Group exams by week
+       * @param {Array} exams - Array of exam objects
+       * @returns {Object} Object with weeks as keys and arrays of exams as values
+       */
       function groupExamsByWeek(exams) {
         const weeks = {};
-        const currentWeekNum = getWeekNumber(CURRENT_DATE);
         
         exams.forEach(exam => {
           const week = exam.Week || 'Unscheduled';
           if (!weeks[week]) {
-            const examDate = parseExamDate(exam.Date);
-            const examWeekNum = examDate ? getWeekNumber(examDate) : null;
-            
             weeks[week] = {
               exams: [],
-              isCurrent: examWeekNum && currentWeekNum && examWeekNum === currentWeekNum
+              isCurrent: false
             };
           }
           weeks[week].exams.push(exam);
         });
         
+        // Determine current week
+        const today = new Date();
+        const currentWeekExams = exams.filter(exam => {
+          const examDate = parseExamDate(exam.Date);
+          if (!examDate) return false;
+          
+          const diffDays = Math.round((examDate - today) / (1000 * 60 * 60 * 24));
+          return diffDays >= 0 && diffDays < 7;
+        });
+        
+        if (currentWeekExams.length > 0) {
+          const currentWeek = currentWeekExams[0].Week;
+          if (weeks[currentWeek]) {
+            weeks[currentWeek].isCurrent = true;
+          }
+        }
+        
         return weeks;
       }
-
+      
+      /**
+       * Render a week of exams
+       * @param {string} weekNumber - Week number
+       * @param {Object} weekData - Week data object
+       * @returns {string} HTML for the week
+       */
       function renderWeek(weekNumber, weekData) {
         const { exams, isCurrent } = weekData;
+        
         return `
           <div class="week-container ${isCurrent ? 'current-week' : ''}">
             <div class="week-header">
@@ -482,32 +745,26 @@
             </div>
             <div class="exam-grid">
               ${exams.map(exam => {
-                const status = getExamStatus(exam.Date);
-                const countdown = calculateCountdown(exam.Date);
-                
-                // Get the exam date for data attribute
-                let examMonth = '';
-                if (exam.Date) {
-                  const date = parseExamDate(exam.Date);
-                  if (date) {
-                    examMonth = date.getMonth() + 1;
-                  }
-                }
+                const daysUntil = calculateDaysUntil(exam.Date);
+                const highlightClass = getExamHighlightClass(daysUntil);
+                const hardness = HARDNESS_DATA[exam.id] || 'Not rated';
                 
                 return `
-                  <div class="exam-card ${status}" data-date="${exam.Date || ''}" data-status="${status || 'future'}">
+                  <div class="exam-card ${highlightClass}">
                     <div class="exam-date">${formatDate(exam.Date)}</div>
                     <div class="h5 mb-1">${exam.Subject}</div>
-                    <div class="board-badge">${exam.Board}</div>
+                    <div class="badge bg-secondary mb-2">${exam.Board}</div>
                     <div class="exam-time">
                       <i class="far fa-clock"></i> Time: ${exam.Time || 'TBC'}<br>
                       <i class="fas fa-hourglass-half"></i> Length: ${exam.Length || 'TBC'}
                     </div>
-                    ${exam.Room ? `
-                    <div class="exam-details">
-                      <i class="fas fa-map-marker-alt"></i> Room: ${exam.Room}
+                    <div class="mt-2">
+                      <span class="badge bg-info">Difficulty: ${hardness}</span>
+                    </div>
+                    ${daysUntil !== null ? `
+                    <div class="countdown">
+                      <i class="fas fa-calendar-day"></i> ${daysUntil} days away
                     </div>` : ''}
-                    ${countdown ? `<div class="countdown mt-2">${countdown}</div>` : ''}
                   </div>
                 `;
               }).join('')}
@@ -515,241 +772,470 @@
           </div>
         `;
       }
-
-      function setupFilters() {
-        const filterContainer = document.getElementById('filter-container');
-        filterContainer.style.display = 'flex';
+      
+      /**
+       * Find next upcoming exam
+       * @param {Array} exams - Array of exam objects
+       * @returns {Object|null} Next exam object or null if none found
+       */
+      function findNextExam(exams) {
+        if (!exams || exams.length === 0) return null;
         
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-          btn.addEventListener('click', function() {
-            // Remove active class from all buttons
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            
-            // Add active class to clicked button
-            this.classList.add('active');
-            
-            const filter = this.getAttribute('data-filter');
-            const examCards = document.querySelectorAll('.exam-card');
-            
-            examCards.forEach(card => {
-              if (filter === 'all') {
-                card.style.display = '';
-              } else if (filter === 'upcoming') {
-                card.style.display = card.classList.contains('upcoming') ? '' : 'none';
-              } else if (filter === 'today') {
-                card.style.display = card.classList.contains('today') ? '' : 'none';
-              } else if (filter === 'past') {
-                // Get exam date
-                const dateStr = card.getAttribute('data-date');
-                if (!dateStr) {
-                  card.style.display = 'none';
-                  return;
-                }
-                
-                const examDate = parseExamDate(dateStr);
-                if (!examDate) {
-                  card.style.display = 'none';
-                  return;
-                }
-                
-                const today = new Date(CURRENT_DATE);
-                today.setHours(0, 0, 0, 0);
-                
-                examDate.setHours(0, 0, 0, 0);
-                
-                card.style.display = examDate < today ? '' : 'none';
-              }
-            });
-          });
+        const today = new Date(CURRENT_DATE);
+        today.setHours(0, 0, 0, 0);
+        
+        // Filter exams with valid dates in the future
+        const futureExams = exams.filter(exam => {
+          const examDate = parseExamDate(exam.Date);
+          return examDate && examDate >= today;
         });
-      }
-
-      function updateStatistics(exams) {
-        const statsContainer = document.getElementById('stats-container');
-        statsContainer.style.display = 'block';
         
-        // Show exam info
-        document.getElementById('exam-info').style.display = 'block';
+        if (futureExams.length === 0) return null;
+        
+        // Sort by date and return the first one
+        return futureExams.sort((a, b) => {
+          const dateA = parseExamDate(a.Date);
+          const dateB = parseExamDate(b.Date);
+          return dateA - dateB;
+        })[0];
+      }
+      
+      /**
+       * Update statistics
+       * @param {Array} exams - Array of exam objects
+       */
+      function updateStatistics(exams) {
+        if (!exams || exams.length === 0) {
+          totalExamsElement.textContent = '0';
+          uniqueSubjectsElement.textContent = '0';
+          daysToNextElement.textContent = '0';
+          completedExamsElement.textContent = '0';
+          return;
+        }
         
         // Calculate statistics
         const totalExams = exams.length;
         const uniqueSubjects = [...new Set(exams.map(exam => exam.Subject))].length;
         
-        // Completed exams
-        const completedExams = exams.filter(exam => {
-          if (!exam.Date) return false;
-          const examDate = parseExamDate(exam.Date);
-          if (!examDate) return false;
-          
-          const today = new Date(CURRENT_DATE);
-          today.setHours(0, 0, 0, 0);
-          
-          examDate.setHours(0, 0, 0, 0);
-          
-          return examDate < today;
-        }).length;
-        
-        // Find next exam
-        let nextExam = null;
-        let daysToNext = 0;
-        
+        // Find completed exams
         const today = new Date(CURRENT_DATE);
         today.setHours(0, 0, 0, 0);
         
-        exams.forEach(exam => {
-          if (!exam.Date) return;
-          
+        const completedExams = exams.filter(exam => {
           const examDate = parseExamDate(exam.Date);
-          if (!examDate) return;
-          
-          examDate.setHours(0, 0, 0, 0);
-          
-          if (examDate >= today) {
-            if (!nextExam) {
-              nextExam = exam;
-              daysToNext = Math.floor((examDate - today) / (1000 * 60 * 60 * 24));
-            } else {
-              const currentNextDate = parseExamDate(nextExam.Date);
-              currentNextDate.setHours(0, 0, 0, 0);
-              
-              if (examDate < currentNextDate) {
-                nextExam = exam;
-                daysToNext = Math.floor((examDate - today) / (1000 * 60 * 60 * 24));
-              }
-            }
-          }
-        });
+          return examDate && examDate < today;
+        }).length;
         
-        // Update statistics display
-        document.getElementById('total-exams').textContent = totalExams;
-        document.getElementById('unique-subjects').textContent = uniqueSubjects;
-        document.getElementById('completed-exams').textContent = completedExams;
-        document.getElementById('days-to-next').textContent = daysToNext;
+        // Find next exam and days until
+        NEXT_EXAM = findNextExam(exams);
+        const daysToNext = NEXT_EXAM ? calculateDaysUntil(NEXT_EXAM.Date) : 0;
+        
+        // Update DOM
+        totalExamsElement.textContent = totalExams;
+        uniqueSubjectsElement.textContent = uniqueSubjects;
+        daysToNextElement.textContent = daysToNext;
+        completedExamsElement.textContent = completedExams;
         
         // Update next exam alert
-        const nextExamAlert = document.getElementById('next-exam-alert');
-        
-        if (nextExam) {
-          document.getElementById('next-exam-title').textContent = 
-            daysToNext === 0 ? 'You have an exam today!' : 
-            daysToNext === 1 ? 'You have an exam tomorrow!' : 
-            `Your next exam is in ${daysToNext} days`;
-          
-          document.getElementById('next-exam-details').textContent = 
-            `${nextExam.Subject} (${nextExam.Board}) - ${formatDate(nextExam.Date)}, ${nextExam.Time || 'Time TBC'}`;
-          
+        if (NEXT_EXAM) {
+          nextExamTitle.textContent = daysToNext === 0 
+            ? 'Your exam is TODAY!' 
+            : daysToNext === 1 
+              ? 'Your exam is TOMORROW!' 
+              : `Your next exam is in ${daysToNext} days`;
+              
+          nextExamDetails.textContent = `${NEXT_EXAM.Subject} (${NEXT_EXAM.Board}) - ${formatDate(NEXT_EXAM.Date)}, ${NEXT_EXAM.Time || 'Time TBC'}`;
           nextExamAlert.style.display = 'block';
         } else {
           nextExamAlert.style.display = 'none';
         }
       }
-
-      async function loadUserExams() {
-        hideError();
-        document.getElementById('loading-message').style.display = 'block';
+      
+      /**
+       * Generate revision timetable
+       */
+      async function generateRevisionTimetable() {
+        revisionLoading.style.display = 'block';
+        revisionTableContainer.style.display = 'none';
+        noRevisionData.style.display = 'none';
         
         try {
-          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-          
-          if (sessionError) {
-            throw { message: sessionError.message, status: sessionError.status || 500 };
+          // Check if hardness data is available
+          const hardnessValues = Object.values(HARDNESS_DATA);
+          if (hardnessValues.length === 0) {
+            revisionLoading.style.display = 'none';
+            noRevisionData.style.display = 'block';
+            return;
           }
           
+          // Filter for upcoming exams
+          const today = new Date(CURRENT_DATE);
+          today.setHours(0, 0, 0, 0);
+          
+          const upcomingExams = USER_EXAMS.filter(exam => {
+            const examDate = parseExamDate(exam.Date);
+            return examDate && examDate >= today;
+          });
+          
+          if (upcomingExams.length === 0) {
+            revisionLoading.style.display = 'none';
+            noRevisionData.style.display = 'block';
+            noRevisionData.textContent = 'No upcoming exams found.';
+            return;
+          }
+          
+          // Calculate priority score for each exam
+          const prioritizedExams = upcomingExams.map(exam => {
+            const daysUntil = calculateDaysUntil(exam.Date) || 999;
+            const hardness = HARDNESS_DATA[exam.id] || 3;
+            
+            // Priority formula: higher for closer exams and harder subjects
+            // Scale days until to be between 0 and 1 (1 being very soon)
+            const daysScale = daysUntil <= 30 ? (30 - daysUntil) / 30 : 0;
+            
+            // Scale hardness to be between 0 and 1 (1 being very hard)
+            const hardnessScale = (hardness - 1) / 4;
+            
+            // Combined priority score (60% proximity, 40% hardness)
+            const priorityScore = (daysScale * 0.6) + (hardnessScale * 0.4);
+            
+            // Calculate recommended daily hours
+            let dailyHours = 0;
+            if (daysUntil <= 3) {
+              dailyHours = hardness >= 4 ? 3 : hardness >= 2 ? 2 : 1;
+            } else if (daysUntil <= 7) {
+              dailyHours = hardness >= 4 ? 2 : hardness >= 2 ? 1.5 : 1;
+            } else if (daysUntil <= 14) {
+              dailyHours = hardness >= 4 ? 1.5 : hardness >= 2 ? 1 : 0.5;
+            } else {
+              dailyHours = hardness >= 4 ? 1 : hardness >= 2 ? 0.5 : 0.25;
+            }
+            
+            return {
+              ...exam,
+              daysUntil,
+              hardness,
+              priorityScore,
+              dailyHours
+            };
+          });
+          
+          // Sort by priority score (highest first)
+          prioritizedExams.sort((a, b) => b.priorityScore - a.priorityScore);
+          
+          // Generate HTML for table
+          revisionTbody.innerHTML = prioritizedExams.map((exam, index) => {
+            // Determine priority class
+            let priorityClass = 'priority-none';
+            if (index < prioritizedExams.length * 0.2) {
+              priorityClass = 'priority-high';
+            } else if (index < prioritizedExams.length * 0.5) {
+              priorityClass = 'priority-medium';
+            } else if (index < prioritizedExams.length * 0.8) {
+              priorityClass = 'priority-low';
+            }
+            
+            return `
+              <tr>
+                <td>
+                  <span class="revision-priority ${priorityClass}">${index + 1}</span>
+                </td>
+                <td>${exam.Subject}</td>
+                <td>${formatDate(exam.Date)}</td>
+                <td>${exam.daysUntil}</td>
+                <td>${exam.hardness}/5</td>
+                <td>${exam.dailyHours} hours</td>
+              </tr>
+            `;
+          }).join('');
+          
+          revisionLoading.style.display = 'none';
+          revisionTableContainer.style.display = 'block';
+        } catch (err) {
+          console.error('Error generating revision timetable:', err);
+          revisionLoading.style.display = 'none';
+          noRevisionData.style.display = 'block';
+          noRevisionData.textContent = 'Error generating timetable. Please try again.';
+        }
+      }
+      
+      /**
+       * Load user exams
+       */
+      async function loadUserExams() {
+        loadingMessage.style.display = 'block';
+        weeksContainer.style.display = 'none';
+        noExamsMessage.style.display = 'none';
+        
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
           if (!session) {
-            throw { message: 'No active session found. Please log in.', status: 401 };
+            window.location.href = 'login.html';
+            return;
           }
           
-          updateUserInfo(session.user.email || 'Valinor-70');
-
-          const weeksContainer = document.getElementById('weeks-container');
-          const noExamsMessage = document.getElementById('no-exams-message');
+          updateUserInfo(session.user.email);
           
-          // KEEPING ORIGINAL SQL/QUERY STRUCTURE EXACTLY AS IS
-          const { data: userExams, error: userExamsError } = await supabase
+          // Fetch user exams
+          const { data: userExamsData, error: userExamsError } = await supabase
             .from('user_exams')
             .select('exam_id')
             .eq('user_id', session.user.id);
-
-          if (userExamsError) {
-            throw { message: userExamsError.message, status: userExamsError.status || 500 };
-          }
-
+            
+          if (userExamsError) throw userExamsError;
+          
+          // Fetch all exams
           const { data: allExams, error: examsError } = await supabase
             .from('gcsedata')
             .select('*')
             .order('Date', { ascending: true });
-
-          if (examsError) {
-            throw { message: examsError.message, status: examsError.status || 500 };
-          }
-
-          document.getElementById('loading-message').style.display = 'none';
-
-          const excludedExamIds = userExams.map(ue => ue.exam_id);
-          const userActiveExams = allExams.filter(exam => !excludedExamIds.includes(exam.id));
-
-          if (userActiveExams.length === 0) {
+            
+          if (examsError) throw examsError;
+          
+          // Fetch hardness ratings
+          const { data: hardnessRatings, error: hardnessError } = await supabase
+            .from('user_exam_hardness')
+            .select('exam_id, hardness')
+            .eq('user_id', session.user.id);
+            
+          if (hardnessError) throw hardnessError;
+          
+          // Process hardness data
+          HARDNESS_DATA = {};
+          hardnessRatings.forEach(item => {
+            HARDNESS_DATA[item.exam_id] = item.hardness;
+          });
+          
+          // Filter user's active exams
+          const excludedExamIds = userExamsData.map(ue => ue.exam_id);
+          USER_EXAMS = allExams.filter(exam => !excludedExamIds.includes(exam.id));
+          
+          loadingMessage.style.display = 'none';
+          
+          if (USER_EXAMS.length === 0) {
             weeksContainer.style.display = 'none';
             noExamsMessage.style.display = 'block';
             return;
           }
-
-          weeksContainer.style.display = 'block';
-          noExamsMessage.style.display = 'none';
-
-          // Group by week (keeping original structure)
-          const weeklyExams = groupExamsByWeek(userActiveExams);
+          
+          // Group exams by week and render
+          const weeklyExams = groupExamsByWeek(USER_EXAMS);
           weeksContainer.innerHTML = Object.entries(weeklyExams)
             .sort(([a], [b]) => a.localeCompare(b))
             .map(([week, data]) => renderWeek(week, data))
             .join('');
             
-          // Setup filtering and statistics
-          setupFilters();
-          updateStatistics(userActiveExams);
-
+          weeksContainer.style.display = 'block';
+          
+          // Update statistics
+          updateStatistics(USER_EXAMS);
         } catch (err) {
           console.error('Error loading exams:', err);
-          showError(err);
+          loadingMessage.style.display = 'none';
+          weeksContainer.innerHTML = `
+            <div class="alert alert-danger">
+              Error loading exams: ${err.message || 'Unknown error'}
+            </div>
+          `;
+          weeksContainer.style.display = 'block';
         }
       }
-
-      document.addEventListener('DOMContentLoaded', () => {
-        // Initialize with provided values
-        updateDateTime();
-        updateUserInfo('Valinor-70');
+      
+      /**
+       * Load hardness settings
+       */
+      async function loadHardnessSettings() {
+        hardnessLoading.style.display = 'block';
+        hardnessList.innerHTML = '';
         
-        // Try to load exams
-        loadUserExams();
-        
-        // Event listeners
-        ['select-exams-btn', 'select-exams-btn-main'].forEach(btnId => {
-            const btn = document.getElementById(btnId);
-            if (btn) {
-                btn.addEventListener('click', () => {
-                    window.location.href = 'select-exams.html';
-                });
-            }
-        });
-
-        document.getElementById('logout-btn').addEventListener('click', async () => {
-            try {
-                await supabase.auth.signOut();
-                window.location.href = 'login.html';
-            } catch (err) {
-                console.error('Logout error:', err);
-                showError('Error logging out. Please try again.');
-            }
-        });
-        
-        document.getElementById('retry-btn').addEventListener('click', () => {
-            loadUserExams();
-        });
-        
-        document.getElementById('to-login-btn').addEventListener('click', () => {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (!session) {
             window.location.href = 'login.html';
+            return;
+          }
+          
+          // Fetch all exams
+          const { data: allExams, error: examsError } = await supabase
+            .from('gcsedata')
+            .select('id, Subject, Date')
+            .order('Date', { ascending: true });
+            
+          if (examsError) throw examsError;
+          
+          // Fetch hardness ratings
+          const { data: hardnessRatings, error: hardnessError } = await supabase
+            .from('user_exam_hardness')
+            .select('exam_id, hardness')
+            .eq('user_id', session.user.id);
+            
+          if (hardnessError) throw hardnessError;
+          
+          // Process hardness data
+          const hardnessMap = {};
+          hardnessRatings.forEach(item => {
+            hardnessMap[item.exam_id] = item.hardness;
+          });
+          
+          // Filter for upcoming exams
+          const today = new Date(CURRENT_DATE);
+          today.setHours(0, 0, 0, 0);
+          
+          const upcomingExams = allExams.filter(exam => {
+            const examDate = parseExamDate(exam.Date);
+            return examDate && examDate >= today;
+          });
+          
+          // Render hardness items
+          hardnessList.innerHTML = upcomingExams.map(exam => {
+            const currentHardness = hardnessMap[exam.id] || 0;
+            const daysUntil = calculateDaysUntil(exam.Date);
+            
+            return `
+              <div class="hardness-item">
+                <div class="d-flex justify-content-between">
+                  <h5>${exam.Subject}</h5>
+                  <span class="badge ${daysUntil <= 7 ? 'bg-danger' : 'bg-warning'}">${daysUntil} days</span>
+                </div>
+                <p class="text-muted">${formatDate(exam.Date)}</p>
+                <div class="hardness-controls">
+                  <div class="hardness-rating" data-exam-id="${exam.id}">
+                    ${[1, 2, 3, 4, 5].map(i => `
+                      <i class="fas fa-star hardness-star ${i <= currentHardness ? 'active' : ''}" data-value="${i}"></i>
+                    `).join('')}
+                  </div>
+                  <span class="ms-2">${currentHardness > 0 ? currentHardness : 'Not rated'}</span>
+                </div>
+              </div>
+            `;
+          }).join('');
+          
+          // Add event listeners to stars
+          document.querySelectorAll('.hardness-rating').forEach(rating => {
+            const examId = rating.getAttribute('data-exam-id');
+            rating.querySelectorAll('.hardness-star').forEach(star => {
+              star.addEventListener('click', async () => {
+                const value = parseInt(star.getAttribute('data-value'));
+                await updateHardness(examId, value);
+                
+                // Update UI
+                rating.querySelectorAll('.hardness-star').forEach(s => {
+                  s.classList.toggle('active', parseInt(s.getAttribute('data-value')) <= value);
+                });
+                
+                rating.nextElementSibling.textContent = value;
+              });
+            });
+          });
+          
+          hardnessLoading.style.display = 'none';
+        } catch (err) {
+          console.error('Error loading hardness settings:', err);
+          hardnessLoading.style.display = 'none';
+          hardnessList.innerHTML = `
+            <div class="alert alert-danger">
+              Error loading hardness settings: ${err.message || 'Unknown error'}
+            </div>
+          `;
+        }
+      }
+      
+      /**
+       * Update hardness rating
+       * @param {number} examId - Exam ID
+       * @param {number} hardness - Hardness rating (1-5)
+       */
+      async function updateHardness(examId, hardness) {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (!session) {
+            window.location.href = 'login.html';
+            return;
+          }
+          
+          const userId = session.user.id;
+          
+          const { error } = await supabase
+            .from('user_exam_hardness')
+            .upsert({ user_id: userId, exam_id: examId, hardness });
+            
+          if (error) throw error;
+          
+          // Update global hardness data
+          HARDNESS_DATA[examId] = hardness;
+          
+          // If on timetable tab, reload to show updated hardness
+          if (document.getElementById('timetable-tab').classList.contains('active')) {
+            loadUserExams();
+          }
+        } catch (err) {
+          console.error('Error updating hardness:', err);
+          alert('Error updating hardness rating. Please try again.');
+        }
+      }
+      
+      /**
+       * Initialize the app
+       */
+      async function initialize() {
+        try {
+          // Start timer for datetime updates
+          updateDateTime();
+          TIMER_INTERVAL = setInterval(updateDateTime, 1000);
+          
+          // Load initial data
+          await loadUserExams();
+          await loadHardnessSettings();
+          
+          // Hide loading overlay
+          loadingOverlay.style.display = 'none';
+        } catch (err) {
+          console.error('Error initializing app:', err);
+          loadingOverlay.style.display = 'none';
+        }
+      }
+      
+      // Event listeners
+      document.addEventListener('DOMContentLoaded', () => {
+        // Initialize app
+        initialize();
+        
+        // Tab navigation
+        document.querySelectorAll('.nav-link').forEach(tab => {
+          tab.addEventListener('click', () => {
+            document.querySelectorAll('.nav-link').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('show', 'active'));
+            
+            tab.classList.add('active');
+            const targetId = tab.getAttribute('data-bs-target').replace('#', '');
+            document.getElementById(targetId).classList.add('show', 'active');
+          });
         });
+        
+        // Select exams button
+        document.querySelectorAll('#select-exams-btn, #select-exams-btn-main').forEach(btn => {
+          btn.addEventListener('click', () => {
+            window.location.href = 'select-exams.html';
+          });
+        });
+        
+        // Logout button
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+          try {
+            await supabase.auth.signOut();
+            window.location.href = 'login.html';
+          } catch (err) {
+            console.error('Error logging out:', err);
+            alert('Error logging out. Please try again.');
+          }
+        });
+        
+        // Generate revision timetable button
+        document.getElementById('generate-revision-btn').addEventListener('click', generateRevisionTimetable);
       });
+      
+      // Make updateHardness available to inline onclick handlers
+      window.updateHardness = updateHardness;
     </script>
   </body>
 </html>
