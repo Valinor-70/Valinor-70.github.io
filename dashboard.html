@@ -288,39 +288,6 @@
         margin-bottom: 20px;
         color: white;
       }
-      /* ============================ Spacer Lines for File Length ============================ */
-      /* Extra spacer lines to exceed 700 lines */
-      /* Line 601 */
-      /* ------------------------------------------------------------------ */
-      /* Line 602 */
-      /* ------------------------------------------------------------------ */
-      /* Line 603 */
-      /* ------------------------------------------------------------------ */
-      /* Line 604 */
-      /* ------------------------------------------------------------------ */
-      /* Line 605 */
-      /* ------------------------------------------------------------------ */
-      /* Line 606 */
-      /* ------------------------------------------------------------------ */
-      /* Line 607 */
-      /* ------------------------------------------------------------------ */
-      /* Line 608 */
-      /* ------------------------------------------------------------------ */
-      /* Line 609 */
-      /* ------------------------------------------------------------------ */
-      /* Line 610 */
-      /* ------------------------------------------------------------------ */
-      /* Line 611 */
-      /* ------------------------------------------------------------------ */
-      /* Line 612 */
-      /* ------------------------------------------------------------------ */
-      /* Line 613 */
-      /* ------------------------------------------------------------------ */
-      /* Line 614 */
-      /* ------------------------------------------------------------------ */
-      /* Line 615 */
-      /* ------------------------------------------------------------------ */
-      /* End of spacer lines */
     </style>
   </head>
   <body>
@@ -485,7 +452,7 @@
       
       // Global variables
       let CURRENT_DATE = new Date();
-      let USER_EXAMS = []; // Exams the user is doing, after filtering out those they are not doing.
+      let USER_EXAMS = []; // Exams the user is doing (after filtering out those they are not doing).
       let HARDNESS_DATA = {}; // Hardness ratings, keyed by exam id.
       let NEXT_EXAM = null;
       let TIMER_INTERVAL;
@@ -519,9 +486,7 @@
       const hardnessLoading = document.getElementById('hardness-loading');
       
       /**
-       * Format date for display.
-       * @param {string} dateStr - Format "DD/MM/YY"
-       * @returns {string} Formatted date.
+       * Format a date string ("DD/MM/YY") into a formatted date.
        */
       function formatDate(dateStr) {
         if (!dateStr) return 'TBC';
@@ -537,9 +502,7 @@
       }
       
       /**
-       * Parse exam date string ("DD/MM/YY") into Date object.
-       * @param {string} dateStr 
-       * @returns {Date|null}
+       * Parse exam date string ("DD/MM/YY") into a Date object.
        */
       function parseExamDate(dateStr) {
         if (!dateStr) return null;
@@ -556,8 +519,6 @@
       
       /**
        * Calculate days until an exam.
-       * @param {string} dateStr 
-       * @returns {number|null}
        */
       function calculateDaysUntil(dateStr) {
         const examDate = parseExamDate(dateStr);
@@ -571,9 +532,7 @@
       }
       
       /**
-       * Get a CSS class based on days until the exam.
-       * @param {number} daysUntil 
-       * @returns {string}
+       * Return a CSS class based on days until the exam.
        */
       function getExamHighlightClass(daysUntil) {
         if (daysUntil <= 2) return 'red';
@@ -583,7 +542,7 @@
       }
       
       /**
-       * Update current date/time display and countdown timer.
+       * Update the current date/time display and countdown timer.
        */
       function updateDateTime() {
         CURRENT_DATE = new Date();
@@ -593,8 +552,7 @@
       }
       
       /**
-       * Update exact countdown to next exam.
-       * Uses exam time: AM exam at 9:30, PM exam at 13:30.
+       * Update the exact countdown to the next exam.
        */
       function updateExactCountdown() {
         if (!NEXT_EXAM || !NEXT_EXAM.Date) {
@@ -626,8 +584,7 @@
       }
       
       /**
-       * Update user info display.
-       * @param {string} username 
+       * Update the current user info display.
        */
       function updateUserInfo(username = 'Valinor-70') {
         userInfoDisplay.textContent = `Current User: ${username}`;
@@ -635,8 +592,6 @@
       
       /**
        * Group exams by week.
-       * @param {Array} exams 
-       * @returns {Object}
        */
       function groupExamsByWeek(exams) {
         const weeks = {};
@@ -663,9 +618,6 @@
       
       /**
        * Render a week section.
-       * @param {string} weekNumber 
-       * @param {Object} weekData 
-       * @returns {string}
        */
       function renderWeek(weekNumber, weekData) {
         const { exams, isCurrent } = weekData;
@@ -679,7 +631,8 @@
               ${exams.map(exam => {
                 const daysUntil = calculateDaysUntil(exam.Date);
                 const highlightClass = getExamHighlightClass(daysUntil);
-                const hardness = HARDNESS_DATA[exam.id] || 'Not rated';
+                // Use the hardness value if already loaded; otherwise display "Not rated"
+                const hardness = HARDNESS_DATA[exam.id] !== undefined ? HARDNESS_DATA[exam.id] : 'Not rated';
                 return `
                   <div class="exam-card ${highlightClass}">
                     <div class="exam-date">${formatDate(exam.Date)}</div>
@@ -705,10 +658,7 @@
       }
       
       /**
-       * Compute an exam's timestamp.
-       * AM exam gets 9:30; PM exam gets 13:30.
-       * @param {Object} exam 
-       * @returns {number}
+       * Compute an exam's timestamp (AM: 9:30, PM: 13:30).
        */
       function computeExamTimestamp(exam) {
         const examDate = parseExamDate(exam.Date);
@@ -723,9 +673,7 @@
       }
       
       /**
-       * Find the next exam (earliest exam) using computed timestamps.
-       * @param {Array} exams 
-       * @returns {Object|null}
+       * Find the next exam (earliest exam).
        */
       function findNextExam(exams) {
         if (!exams || exams.length === 0) return null;
@@ -737,7 +685,6 @@
       
       /**
        * Update statistics display.
-       * @param {Array} exams 
        */
       function updateStatistics(exams) {
         if (!exams || exams.length === 0) {
@@ -773,7 +720,7 @@
       
       /**
        * Generate the revision timetable based on USER_EXAMS.
-       * For any exam missing a hardness rating, default to 3.
+       * For any exam with missing hardness, default to 3.
        */
       async function generateRevisionTimetable() {
         revisionLoading.style.display = 'block';
@@ -794,7 +741,7 @@
           }
           const prioritizedExams = upcomingExams.map(exam => {
             const daysUntil = calculateDaysUntil(exam.Date) || 999;
-            // Use stored hardness rating or default to 3.
+            // Use the stored hardness, or default to 3 if not available.
             const hardness = HARDNESS_DATA[exam.id] !== undefined ? HARDNESS_DATA[exam.id] : 3;
             const daysScale = daysUntil <= 30 ? (30 - daysUntil) / 30 : 0;
             const hardnessScale = (hardness - 1) / 4;
@@ -835,8 +782,7 @@
       
       /**
        * Load user exams from Supabase.
-       * NOTE: The database stores the exams the user is NOT doing.
-       * Therefore, we include only those exams NOT listed in the database.
+       * Since the database stores exams the user is NOT doing, we filter those out.
        */
       async function loadUserExams() {
         loadingMessage.style.display = 'block';
@@ -887,8 +833,8 @@
       
       /**
        * Load hardness settings.
-       * Only display exams from USER_EXAMS.
        * This function queries the table "user_exam_hardness".
+       * After loading, it re-renders the timetable so that the correct hardness ratings are displayed.
        */
       async function loadHardnessSettings() {
         hardnessLoading.style.display = 'block';
@@ -951,6 +897,10 @@
             });
           });
           hardnessLoading.style.display = 'none';
+          // Re-render the timetable now that hardness ratings have been updated.
+          if (USER_EXAMS.length > 0) {
+            loadUserExams();
+          }
         } catch (err) {
           console.error('Error loading hardness settings:', err);
           hardnessLoading.style.display = 'none';
@@ -960,8 +910,6 @@
       
       /**
        * Update hardness rating for a given exam.
-       * @param {number} examId 
-       * @param {number} hardness 
        */
       async function updateHardness(examId, hardness) {
         try {
@@ -1032,41 +980,6 @@
       });
       
       window.updateHardness = updateHardness;
-      
-      /* Additional spacer lines to ensure file length exceeds 700 lines */
-      // Line 700
-      // ---------------------------------------------------------------------
-      // Line 701
-      // ---------------------------------------------------------------------
-      // Line 702
-      // ---------------------------------------------------------------------
-      // Line 703
-      // ---------------------------------------------------------------------
-      // Line 704
-      // ---------------------------------------------------------------------
-      // Line 705
-      // ---------------------------------------------------------------------
-      // Line 706
-      // ---------------------------------------------------------------------
-      // Line 707
-      // ---------------------------------------------------------------------
-      // Line 708
-      // ---------------------------------------------------------------------
-      // Line 709
-      // ---------------------------------------------------------------------
-      // Line 710
-      // ---------------------------------------------------------------------
-      // Line 711
-      // ---------------------------------------------------------------------
-      // Line 712
-      // ---------------------------------------------------------------------
-      // Line 713
-      // ---------------------------------------------------------------------
-      // Line 714
-      // ---------------------------------------------------------------------
-      // Line 715
-      // ---------------------------------------------------------------------
-      // End of spacer lines
       
     </script>
   </body>
