@@ -69,7 +69,7 @@
           <div class="col-md-6 col-lg-4">
             <div class="login-wrap p-0">
               <h3 class="mb-4 text-center">GCSE Timetable Login</h3>
-              <div class="timestamp-info">Current Date: 2025-05-08 09:23:45 UTC</div>
+              <div id="timestamp-info" class="timestamp-info">Current Date: 2025-05-08 09:27:44 UTC</div>
               
               <form id="login-form" class="signin-form">
                 <div class="form-box" onclick="focusInput(this)">
@@ -102,7 +102,7 @@
                   </button>
                 </div>
                 
-                <div class="user-info">Last login: Valinor-70</div>
+                <div id="user-info" class="user-info">Last login: Valinor-70</div>
               </form>
             </div>
           </div>
@@ -132,6 +132,41 @@
         const input = element.querySelector('input');
         if (input) input.focus();
       };
+
+      // Function to get current UTC date and time in YYYY-MM-DD HH:MM:SS format
+      function getCurrentUTCDateTime() {
+        const now = new Date();
+        
+        const year = now.getUTCFullYear();
+        const month = String(now.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(now.getUTCDate()).padStart(2, '0');
+        const hours = String(now.getUTCHours()).padStart(2, '0');
+        const minutes = String(now.getUTCMinutes()).padStart(2, '0');
+        const seconds = String(now.getUTCSeconds()).padStart(2, '0');
+        
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      }
+      
+      // Function to update the date display
+      function updateDateTime() {
+        const dateTimeString = getCurrentUTCDateTime();
+        document.getElementById('timestamp-info').textContent = `Current Date: ${dateTimeString} UTC`;
+      }
+      
+      // Update date and time immediately and then every second
+      updateDateTime();
+      setInterval(updateDateTime, 1000);
+      
+      // Set current user if available
+      function updateUserInfo() {
+        // In a real app, this would come from a session
+        const currentUser = 'Valinor-70';
+        if (currentUser) {
+          document.getElementById('user-info').textContent = `Last login: ${currentUser}`;
+        }
+      }
+      
+      updateUserInfo();
 
       function showMessage(message, isError = true) {
         const errorEl = document.getElementById('login-error');

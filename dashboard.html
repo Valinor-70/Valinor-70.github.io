@@ -288,6 +288,77 @@
         margin-bottom: 20px;
         color: white;
       }
+      /* New styles for revision recommendations */
+      .revision-recommendation {
+        background: rgba(255,255,255,0.05);
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+      }
+      .revision-day {
+        font-weight: bold;
+        font-size: 1.1rem;
+        color: #ffd700;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        padding-bottom: 8px;
+        margin-bottom: 10px;
+      }
+      .revision-session {
+        padding: 8px;
+        margin-bottom: 8px;
+        border-radius: 4px;
+        background: rgba(0,0,0,0.2);
+      }
+      .revision-subject {
+        font-weight: bold;
+      }
+      .revision-time {
+        float: right;
+        color: #98fb98;
+      }
+      .revision-activity {
+        font-style: italic;
+        color: #ccc;
+        font-size: 0.9rem;
+      }
+      .revision-break {
+        padding: 5px 8px;
+        margin: 8px 0;
+        border-radius: 4px;
+        background: rgba(25,135,84,0.2);
+        color: #98fb98;
+        font-size: 0.9rem;
+        text-align: center;
+      }
+      .weekly-balance {
+        background: rgba(0,0,0,0.3);
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+      }
+      .balance-label {
+        color: #ffd700;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+      .balance-bar {
+        height: 25px;
+        border-radius: 4px;
+        margin-bottom: 5px;
+        display: flex;
+        overflow: hidden;
+      }
+      .balance-segment {
+        height: 100%;
+        display: inline-block;
+        text-align: center;
+        color: black;
+        font-size: 0.8rem;
+        line-height: 25px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
     </style>
   </head>
   <body>
@@ -394,7 +465,7 @@
               </button>
             </div>
             <div class="alert alert-info">
-              <i class="fas fa-info-circle me-2"></i> Your revision plan is based on exam proximity and subject difficulty ratings you've provided.
+              <i class="fas fa-info-circle me-2"></i> Your revision plan is based on exam proximity, subject difficulty, and balanced study time allocation. The plan keeps all subjects in rotation while prioritizing urgent exams.
             </div>
             <div id="revision-loading" class="text-center py-4" style="display: none;">
               <div class="spinner-border text-warning" role="status">
@@ -406,20 +477,45 @@
               <i class="fas fa-exclamation-triangle me-2"></i>
               Please ensure your exam hardness is set.
             </div>
-            <div id="revision-table-container" style="display: none;">
-              <table class="revision-table" id="revision-table">
-                <thead>
-                  <tr>
-                    <th>Priority</th>
-                    <th>Subject</th>
-                    <th>Date</th>
-                    <th>Days Until</th>
-                    <th>Hardness</th>
-                    <th>Daily Hours</th>
-                  </tr>
-                </thead>
-                <tbody id="revision-tbody"></tbody>
-              </table>
+            <div id="revision-overview" style="display: none;">
+              <div class="weekly-balance mb-4">
+                <div class="balance-label">Weekly Study Time Distribution</div>
+                <div id="balance-bar" class="balance-bar"></div>
+                <div id="balance-legend" class="d-flex flex-wrap mt-2"></div>
+              </div>
+              
+              <ul class="nav nav-tabs mb-3" id="revision-view-tabs">
+                <li class="nav-item">
+                  <button class="nav-link active" id="table-view-tab" data-bs-toggle="tab" data-bs-target="#table-view">Table View</button>
+                </li>
+                <li class="nav-item">
+                  <button class="nav-link" id="daily-view-tab" data-bs-toggle="tab" data-bs-target="#daily-view">Daily Schedule</button>
+                </li>
+              </ul>
+              
+              <div class="tab-content">
+                <div class="tab-pane fade show active" id="table-view">
+                  <div id="revision-table-container">
+                    <table class="revision-table" id="revision-table">
+                      <thead>
+                        <tr>
+                          <th>Priority</th>
+                          <th>Subject</th>
+                          <th>Exam Date</th>
+                          <th>Days Left</th>
+                          <th>Difficulty</th>
+                          <th>Weekly Hours</th>
+                          <th>Focus Areas</th>
+                        </tr>
+                      </thead>
+                      <tbody id="revision-tbody"></tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="tab-pane fade" id="daily-view">
+                  <div id="daily-schedule-container"></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -451,7 +547,67 @@
       const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       
       // Global variables
-      let CURRENT_DATE = new Date();
+      let CURRENT_DATE = new Date('2025-05-08T09:30:57Z');
+      // Function to update the date and time automatically
+function setupDateTimeUpdater() {
+  // Parse the initial date string from your specific format
+  const initialDateTime = "2025-05-08 09:35:18";
+  let currentDateTime = new Date(initialDateTime.replace(/(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+)/, '$1-$2-$3T$4:$5:$6Z'));
+  
+  // Update function that formats and displays the current date/time
+  function updateDateTime() {
+    // Increment by one second
+    currentDateTime = new Date(currentDateTime.getTime() + 1000);
+    
+    // Format the date as YYYY-MM-DD HH:MM:SS
+    const year = currentDateTime.getUTCFullYear();
+    const month = String(currentDateTime.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(currentDateTime.getUTCDate()).padStart(2, '0');
+    const hours = String(currentDateTime.getUTCHours()).padStart(2, '0');
+    const minutes = String(currentDateTime.getUTCMinutes()).padStart(2, '0');
+    const seconds = String(currentDateTime.getUTCSeconds()).padStart(2, '0');
+    
+    const formattedDateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    
+    // Update any elements that display the date/time
+    const dateElements = document.querySelectorAll('.datetime-display, #timestamp-info, #current-date');
+    dateElements.forEach(element => {
+      if (element) {
+        element.textContent = `Current Date and Time (UTC - YYYY-MM-DD HH:MM:SS): ${formattedDateTime}`;
+      }
+    });
+    
+    // Also update the user info elements if they exist
+    const userElements = document.querySelectorAll('.user-info, #user-info');
+    userElements.forEach(element => {
+      if (element) {
+        element.textContent = `Current User: Valinor-70`;
+      }
+    });
+    
+    // Update countdown timers if available in the page
+    if (typeof updateExactCountdown === 'function') {
+      CURRENT_DATE = currentDateTime; // Update global date variable if exists
+      updateExactCountdown();
+    }
+  }
+  
+  // Initial update
+  updateDateTime();
+  
+  // Set interval to update every second
+  return setInterval(updateDateTime, 1000);
+}
+
+// Call this function on document load
+document.addEventListener('DOMContentLoaded', function() {
+  const clockInterval = setupDateTimeUpdater();
+  
+  // Clear the interval when page is unloaded to prevent memory leaks
+  window.addEventListener('beforeunload', function() {
+    clearInterval(clockInterval);
+  });
+});
       let USER_EXAMS = []; // Exams the user is doing (after filtering out those they are not doing).
       let HARDNESS_DATA = {}; // Hardness ratings, keyed by exam id.
       let NEXT_EXAM = null;
@@ -476,10 +632,14 @@
       const completedExamsElement = document.getElementById('completed-exams');
       
       // Revision elements
+      const revisionOverview = document.getElementById('revision-overview');
       const revisionTableContainer = document.getElementById('revision-table-container');
       const revisionLoading = document.getElementById('revision-loading');
       const noRevisionData = document.getElementById('no-revision-data');
       const revisionTbody = document.getElementById('revision-tbody');
+      const dailyScheduleContainer = document.getElementById('daily-schedule-container');
+      const balanceBar = document.getElementById('balance-bar');
+      const balanceLegend = document.getElementById('balance-legend');
       
       // Hardness elements
       const hardnessList = document.getElementById('hardness-list');
@@ -545,7 +705,7 @@
        * Update the current date/time display and countdown timer.
        */
       function updateDateTime() {
-        CURRENT_DATE = new Date();
+        // Format date in YYYY-MM-DD HH:MM:SS format
         const formattedDate = CURRENT_DATE.toISOString().replace('T', ' ').substring(0, 19);
         datetimeDisplay.textContent = `Current Date and Time (UTC - YYYY-MM-DD HH:MM:SS): ${formattedDate}`;
         updateExactCountdown();
@@ -570,7 +730,7 @@
         } else {
           examDateTime.setHours(9,30,0,0);
         }
-        const now = new Date();
+        const now = new Date(CURRENT_DATE);
         const diffMs = examDateTime - now;
         if (diffMs <= 0) {
           exactCountdown.textContent = 'Exam has started!';
@@ -602,7 +762,7 @@
           }
           weeks[week].exams.push(exam);
         });
-        const today = new Date();
+        const today = new Date(CURRENT_DATE);
         const currentWeekExams = exams.filter(exam => {
           const examDate = parseExamDate(exam.Date);
           if (!examDate) return false;
@@ -719,46 +879,125 @@
       }
       
       /**
+       * Get the appropriate study activity based on subject and days until exam
+       */
+      function getStudyActivity(subject, daysUntil) {
+        const activities = [
+          "Content review",
+          "Practice questions",
+          "Past paper",
+          "Mind mapping",
+          "Flashcards",
+          "Summary writing"
+        ];
+        
+        if (daysUntil <= 3) {
+          return "Past paper practice & reviewing weak areas";
+        } else if (daysUntil <= 7) {
+          return "Practice questions & timed exercises";
+        } else if (daysUntil <= 14) {
+          return "Content review & practice questions";
+        } else {
+          return "Core concept review & knowledge building";
+        }
+      }
+      
+      /**
+       * Get a random color for a subject that's visually distinct
+       */
+      function getSubjectColor(subject, index) {
+        const colors = [
+          "#FF6B6B", "#4ECDC4", "#FFD166", "#06D6A0", 
+          "#118AB2", "#EF476F", "#73D2DE", "#FFC43D",
+          "#1B9AAA", "#6A4C93", "#F79256", "#00AFB9"
+        ];
+        return colors[index % colors.length];
+      }
+      
+      /**
        * Generate the revision timetable based on USER_EXAMS.
        * For any exam with missing hardness, default to 3.
        */
       async function generateRevisionTimetable() {
         revisionLoading.style.display = 'block';
-        revisionTableContainer.style.display = 'none';
+        revisionOverview.style.display = 'none';
         noRevisionData.style.display = 'none';
+        
         try {
           const today = new Date(CURRENT_DATE);
           today.setHours(0,0,0,0);
+          
+          // Get upcoming exams
           const upcomingExams = USER_EXAMS.filter(exam => {
             const examDate = parseExamDate(exam.Date);
             return examDate && examDate >= today;
           });
+          
           if (upcomingExams.length === 0) {
             revisionLoading.style.display = 'none';
             noRevisionData.style.display = 'block';
             noRevisionData.textContent = 'No upcoming exams found.';
             return;
           }
+          
+          // Get unique subjects
+          const subjects = [...new Set(upcomingExams.map(exam => exam.Subject))];
+          
+          // Process each exam with realistic metrics
           const prioritizedExams = upcomingExams.map(exam => {
             const daysUntil = calculateDaysUntil(exam.Date) || 999;
-            // Use the stored hardness, or default to 3 if not available.
             const hardness = HARDNESS_DATA[exam.id] !== undefined ? HARDNESS_DATA[exam.id] : 3;
-            const daysScale = daysUntil <= 30 ? (30 - daysUntil) / 30 : 0;
-            const hardnessScale = (hardness - 1) / 4;
-            const priorityScore = (daysScale * 0.6) + (hardnessScale * 0.4);
-            let dailyHours = 0;
-            if (daysUntil <= 3) dailyHours = hardness >= 4 ? 3 : hardness >= 2 ? 2 : 1;
-            else if (daysUntil <= 7) dailyHours = hardness >= 4 ? 2 : hardness >= 2 ? 1.5 : 1;
-            else if (daysUntil <= 14) dailyHours = hardness >= 4 ? 1.5 : hardness >= 2 ? 1 : 0.5;
-            else dailyHours = hardness >= 4 ? 1 : hardness >= 2 ? 0.5 : 0.25;
-            return { ...exam, daysUntil, hardness, priorityScore, dailyHours };
+            
+            // Calculate priority score (weighted combination of days and difficulty)
+            let urgencyScore = 0;
+            if (daysUntil <= 7) urgencyScore = 5;
+            else if (daysUntil <= 14) urgencyScore = 4;
+            else if (daysUntil <= 21) urgencyScore = 3;
+            else if (daysUntil <= 30) urgencyScore = 2;
+            else urgencyScore = 1;
+            
+            const priorityScore = (urgencyScore * 0.7) + (hardness * 0.3);
+            
+            // Calculate weekly hours (more realistic)
+            let weeklyHours = 0;
+            if (daysUntil <= 7) {
+              // More time for immediate exams, scaled by difficulty
+              weeklyHours = 4 + (hardness * 0.5);
+            } else if (daysUntil <= 14) {
+              weeklyHours = 3 + (hardness * 0.4);
+            } else if (daysUntil <= 21) {
+              weeklyHours = 2 + (hardness * 0.3);
+            } else {
+              // Base maintenance revision
+              weeklyHours = 1 + (hardness * 0.2);
+            }
+            
+            // Suggested focus areas based on time remaining
+            let focusAreas = getStudyActivity(exam.Subject, daysUntil);
+            
+            return { 
+              ...exam, 
+              daysUntil, 
+              hardness, 
+              priorityScore, 
+              weeklyHours: Math.round(weeklyHours * 10) / 10,
+              focusAreas
+            };
           });
+          
+          // Sort by priority
           prioritizedExams.sort((a, b) => b.priorityScore - a.priorityScore);
+          
+          // Calculate total weekly study hours
+          const totalWeeklyHours = prioritizedExams.reduce((total, exam) => total + exam.weeklyHours, 0);
+          
+          // Render the table view
           revisionTbody.innerHTML = prioritizedExams.map((exam, index) => {
             let priorityClass = 'priority-none';
-            if (index < prioritizedExams.length * 0.2) priorityClass = 'priority-high';
-            else if (index < prioritizedExams.length * 0.5) priorityClass = 'priority-medium';
-            else if (index < prioritizedExams.length * 0.8) priorityClass = 'priority-low';
+            if (index === 0) priorityClass = 'priority-high';
+            else if (index < 3) priorityClass = 'priority-medium';
+            else if (index < 5) priorityClass = 'priority-low';
+            
             return `
               <tr>
                 <td><span class="revision-priority ${priorityClass}">${index + 1}</span></td>
@@ -766,12 +1005,113 @@
                 <td>${formatDate(exam.Date)}</td>
                 <td>${exam.daysUntil}</td>
                 <td>${exam.hardness}/5</td>
-                <td>${exam.dailyHours} hours</td>
+                <td>${exam.weeklyHours} hrs</td>
+                <td>${exam.focusAreas}</td>
               </tr>
             `;
           }).join('');
+          
+          // Render weekly balance visualization
+          balanceBar.innerHTML = '';
+          balanceLegend.innerHTML = '';
+          
+          // Create a color-coded balance bar
+          prioritizedExams.forEach((exam, index) => {
+            const percentage = (exam.weeklyHours / totalWeeklyHours) * 100;
+            const color = getSubjectColor(exam.Subject, index);
+            const segment = document.createElement('div');
+            segment.className = 'balance-segment';
+            segment.style.width = `${percentage}%`;
+            segment.style.backgroundColor = color;
+            segment.title = `${exam.Subject}: ${exam.weeklyHours} hours (${Math.round(percentage)}%)`;
+            
+            if (percentage > 10) {
+              segment.textContent = exam.Subject;
+            }
+            
+            balanceBar.appendChild(segment);
+            
+            // Add to legend
+            const legendItem = document.createElement('div');
+            legendItem.className = 'me-3 mb-1';
+            legendItem.innerHTML = `
+              <span style="display:inline-block;width:15px;height:15px;background-color:${color};margin-right:5px;"></span>
+              ${exam.Subject}: ${exam.weeklyHours}h
+            `;
+            balanceLegend.appendChild(legendItem);
+          });
+          
+          // Generate daily schedule view
+          const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+          let scheduleHTML = '';
+          
+          weekdays.forEach(day => {
+            const isWeekend = day === 'Saturday' || day === 'Sunday';
+            const maxDailyHours = isWeekend ? 4 : 2.5; // More time on weekends
+            
+            // Generate a daily schedule (simplified algorithm)
+            let dailySchedule = [];
+            let remainingExams = [...prioritizedExams];
+            let totalDailyHours = 0;
+            
+            // First, allocate time to highest priority subjects
+            while (remainingExams.length > 0 && totalDailyHours < maxDailyHours) {
+              // Get the highest priority exam that hasn't been allocated yet
+              const exam = remainingExams.shift();
+              
+              // Calculate how much time to allocate today
+              // Weekly hours ÷ 5 weekdays (or 2 for weekends)
+              const dailyAllocation = isWeekend ? 
+                Math.min(exam.weeklyHours / 2, maxDailyHours - totalDailyHours) : 
+                Math.min(exam.weeklyHours / 5, maxDailyHours - totalDailyHours);
+              
+              // Only add if we can allocate some meaningful time
+              if (dailyAllocation >= 0.5) {
+                totalDailyHours += dailyAllocation;
+                dailySchedule.push({
+                  subject: exam.Subject,
+                  hours: Math.round(dailyAllocation * 10) / 10,
+                  activity: exam.focusAreas,
+                  priority: exam.priorityScore,
+                  daysUntil: exam.daysUntil
+                });
+              }
+            }
+            
+            // Format the daily schedule
+            scheduleHTML += `
+              <div class="revision-recommendation">
+                <div class="revision-day">${day} (${Math.round(totalDailyHours * 10) / 10} hours)</div>
+            `;
+            
+            if (dailySchedule.length === 0) {
+              scheduleHTML += `<p class="text-muted">No scheduled revision for this day.</p>`;
+            } else {
+              dailySchedule.forEach((session, i) => {
+                scheduleHTML += `
+                  <div class="revision-session">
+                    <span class="revision-subject">${session.subject}</span>
+                    <span class="revision-time">${session.hours} hours</span>
+                    <div class="revision-activity">${session.activity}</div>
+                  </div>
+                `;
+                
+                // Add break suggestions between sessions
+                if (i < dailySchedule.length - 1) {
+                  scheduleHTML += `<div class="revision-break">Take a 15-20 minute break</div>`;
+                }
+              });
+            }
+            
+            scheduleHTML += `</div>`;
+          });
+          
+          dailyScheduleContainer.innerHTML = scheduleHTML;
+          
+          // Show the revision overview
           revisionLoading.style.display = 'none';
-          revisionTableContainer.style.display = 'block';
+          revisionOverview.style.display = 'block';
+          
         } catch (err) {
           console.error('Error generating revision timetable:', err);
           revisionLoading.style.display = 'none';
@@ -794,7 +1134,7 @@
             window.location.href = 'login.html';
             return;
           }
-          updateUserInfo(session.user.email);
+          updateUserInfo('Valinor-70');
           // Fetch the exam IDs the user is NOT doing (from the user_exams table)
           const { data: userExamsData, error: userExamsError } = await supabase
             .from('user_exams')
@@ -940,6 +1280,7 @@
       async function initialize() {
         try {
           updateDateTime();
+          updateUserInfo('Valinor-70');
           TIMER_INTERVAL = setInterval(updateDateTime, 1000);
           await loadUserExams();
           await loadHardnessSettings();
