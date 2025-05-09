@@ -359,6 +359,23 @@
         overflow: hidden;
         text-overflow: ellipsis;
       }
+      /* Custom view tab styles */
+      .revision-view-tabs {
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        margin-bottom: 15px;
+      }
+      .revision-view-tabs .nav-link {
+        color: #ffffff;
+        background: rgba(0,0,0,0.2);
+        margin-right: 5px;
+        border-radius: 5px 5px 0 0;
+        padding: 10px 15px;
+      }
+      .revision-view-tabs .nav-link.active {
+        background: rgba(255,215,0,0.2);
+        color: #ffd700;
+        border-bottom: 2px solid #ffd700;
+      }
     </style>
   </head>
   <body>
@@ -371,8 +388,8 @@
         <div class="d-flex justify-content-between align-items-center flex-wrap">
           <div>
             <h2 class="text-white mb-2">My GCSE Timetable</h2>
-            <div class="user-info mb-1" id="user-info">Current User: Loading...</div>
-            <div class="datetime-display" id="datetime-display">Current Date and Time: Loading...</div>
+            <div class="user-info mb-1" id="user-info">Current User's Login: Valinor-70</div>
+            <div class="datetime-display" id="datetime-display">Current Date and Time (UTC - YYYY-MM-DD HH:MM:SS formatted): 2025-05-08 10:12:50</div>
           </div>
           <div>
             <button id="select-exams-btn" class="btn btn-primary me-2">Select Exams</button>
@@ -477,19 +494,19 @@
               <i class="fas fa-exclamation-triangle me-2"></i>
               Please ensure your exam hardness is set.
             </div>
-            <div id="revision-overview" style="display: none;">
+            <div id="revision-overview">
               <div class="weekly-balance mb-4">
                 <div class="balance-label">Weekly Study Time Distribution</div>
                 <div id="balance-bar" class="balance-bar"></div>
                 <div id="balance-legend" class="d-flex flex-wrap mt-2"></div>
               </div>
               
-              <ul class="nav nav-tabs mb-3" id="revision-view-tabs">
+              <ul class="nav nav-tabs mb-4 revision-view-tabs" id="revision-view-tabs">
                 <li class="nav-item">
-                  <button class="nav-link active" id="table-view-tab" data-bs-toggle="tab" data-bs-target="#table-view">Table View</button>
+                  <a class="nav-link active" id="table-view-tab" data-bs-toggle="tab" data-bs-target="#table-view" href="#">Table View</a>
                 </li>
                 <li class="nav-item">
-                  <button class="nav-link" id="daily-view-tab" data-bs-toggle="tab" data-bs-target="#daily-view">Daily Schedule</button>
+                  <a class="nav-link" id="daily-view-tab" data-bs-toggle="tab" data-bs-target="#daily-view" href="#">Daily Schedule</a>
                 </li>
               </ul>
               
@@ -547,67 +564,7 @@
       const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       
       // Global variables
-      let CURRENT_DATE = new Date('2025-05-08T09:30:57Z');
-      // Function to update the date and time automatically
-function setupDateTimeUpdater() {
-  // Parse the initial date string from your specific format
-  const initialDateTime = "2025-05-08 09:35:18";
-  let currentDateTime = new Date(initialDateTime.replace(/(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+)/, '$1-$2-$3T$4:$5:$6Z'));
-  
-  // Update function that formats and displays the current date/time
-  function updateDateTime() {
-    // Increment by one second
-    currentDateTime = new Date(currentDateTime.getTime() + 1000);
-    
-    // Format the date as YYYY-MM-DD HH:MM:SS
-    const year = currentDateTime.getUTCFullYear();
-    const month = String(currentDateTime.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(currentDateTime.getUTCDate()).padStart(2, '0');
-    const hours = String(currentDateTime.getUTCHours()).padStart(2, '0');
-    const minutes = String(currentDateTime.getUTCMinutes()).padStart(2, '0');
-    const seconds = String(currentDateTime.getUTCSeconds()).padStart(2, '0');
-    
-    const formattedDateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    
-    // Update any elements that display the date/time
-    const dateElements = document.querySelectorAll('.datetime-display, #timestamp-info, #current-date');
-    dateElements.forEach(element => {
-      if (element) {
-        element.textContent = `Current Date and Time (UTC - YYYY-MM-DD HH:MM:SS): ${formattedDateTime}`;
-      }
-    });
-    
-    // Also update the user info elements if they exist
-    const userElements = document.querySelectorAll('.user-info, #user-info');
-    userElements.forEach(element => {
-      if (element) {
-        element.textContent = `Current User: Valinor-70`;
-      }
-    });
-    
-    // Update countdown timers if available in the page
-    if (typeof updateExactCountdown === 'function') {
-      CURRENT_DATE = currentDateTime; // Update global date variable if exists
-      updateExactCountdown();
-    }
-  }
-  
-  // Initial update
-  updateDateTime();
-  
-  // Set interval to update every second
-  return setInterval(updateDateTime, 1000);
-}
-
-// Call this function on document load
-document.addEventListener('DOMContentLoaded', function() {
-  const clockInterval = setupDateTimeUpdater();
-  
-  // Clear the interval when page is unloaded to prevent memory leaks
-  window.addEventListener('beforeunload', function() {
-    clearInterval(clockInterval);
-  });
-});
+      let CURRENT_DATE = new Date();
       let USER_EXAMS = []; // Exams the user is doing (after filtering out those they are not doing).
       let HARDNESS_DATA = {}; // Hardness ratings, keyed by exam id.
       let NEXT_EXAM = null;
@@ -706,8 +663,17 @@ document.addEventListener('DOMContentLoaded', function() {
        */
       function updateDateTime() {
         // Format date in YYYY-MM-DD HH:MM:SS format
-        const formattedDate = CURRENT_DATE.toISOString().replace('T', ' ').substring(0, 19);
-        datetimeDisplay.textContent = `Current Date and Time (UTC - YYYY-MM-DD HH:MM:SS): ${formattedDate}`;
+        CURRENT_DATE = new Date(CURRENT_DATE.getTime() + 1000); // Add 1 second
+        const year = CURRENT_DATE.getUTCFullYear();
+        const month = String(CURRENT_DATE.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(CURRENT_DATE.getUTCDate()).padStart(2, '0');
+        const hours = String(CURRENT_DATE.getUTCHours()).padStart(2, '0');
+        const minutes = String(CURRENT_DATE.getUTCMinutes()).padStart(2, '0');
+        const seconds = String(CURRENT_DATE.getUTCSeconds()).padStart(2, '0');
+        
+        const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        datetimeDisplay.textContent = `Current Date and Time (UTC - YYYY-MM-DD HH:MM:SS formatted): ${formattedDate}`;
+        userInfoDisplay.textContent = `Current User's Login: Valinor-70`;
         updateExactCountdown();
       }
       
@@ -741,13 +707,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const minutes = Math.floor((diffMs % (1000*60*60)) / (1000*60));
         const seconds = Math.floor((diffMs % (1000*60)) / 1000);
         exactCountdown.textContent = `Countdown: ${days} days, ${hours} hours, ${minutes} minutes, ${seconds} seconds`;
-      }
-      
-      /**
-       * Update the current user info display.
-       */
-      function updateUserInfo(username = 'Valinor-70') {
-        userInfoDisplay.textContent = `Current User: ${username}`;
       }
       
       /**
@@ -847,36 +806,42 @@ document.addEventListener('DOMContentLoaded', function() {
        * Update statistics display.
        */
       function updateStatistics(exams) {
-        if (!exams || exams.length === 0) {
-          totalExamsElement.textContent = '0';
-          uniqueSubjectsElement.textContent = '0';
-          daysToNextElement.textContent = '0';
-          completedExamsElement.textContent = '0';
-          return;
-        }
-        const totalExams = exams.length;
-        const uniqueSubjects = [...new Set(exams.map(exam => exam.Subject))].length;
-        const today = new Date(CURRENT_DATE);
-        today.setHours(0,0,0,0);
-        const completedExams = exams.filter(exam => {
-          const examDate = parseExamDate(exam.Date);
-          return examDate && examDate < today;
-        }).length;
-        NEXT_EXAM = findNextExam(exams);
-        const daysToNext = NEXT_EXAM ? calculateDaysUntil(NEXT_EXAM.Date) : 0;
-        totalExamsElement.textContent = totalExams;
-        uniqueSubjectsElement.textContent = uniqueSubjects;
-        daysToNextElement.textContent = daysToNext;
-        completedExamsElement.textContent = completedExams;
-        if (NEXT_EXAM) {
-          nextExamTitle.textContent = daysToNext === 0 ? 'Your exam is TODAY!' :
-            daysToNext === 1 ? 'Your exam is TOMORROW!' : `Your next exam is in ${daysToNext} days`;
-          nextExamDetails.textContent = `${NEXT_EXAM.Subject} (${NEXT_EXAM.Board}) - ${formatDate(NEXT_EXAM.Date)}, ${NEXT_EXAM.Time || 'Time TBC'}`;
-          nextExamAlert.style.display = 'block';
-        } else {
-          nextExamAlert.style.display = 'none';
-        }
-      }
+  if (!exams || exams.length === 0) {
+    totalExamsElement.textContent = '0';
+    uniqueSubjectsElement.textContent = '0';
+    daysToNextElement.textContent = '0';
+    completedExamsElement.textContent = '0';
+    return;
+  }
+
+  const totalExams = exams.length;
+  const uniqueSubjects = [...new Set(exams.map(exam => exam.Subject))].length;
+
+  // Use the current time instead of just the start of the day
+  const currentTime = new Date(CURRENT_DATE);
+
+  const completedExams = exams.filter(exam => {
+    const examDate = parseExamDate(exam.Date);
+    return examDate && examDate <= currentTime; // Includes exams completed earlier on the same day
+  }).length;
+
+  NEXT_EXAM = findNextExam(exams);
+  const daysToNext = NEXT_EXAM ? calculateDaysUntil(NEXT_EXAM.Date) : 0;
+
+  totalExamsElement.textContent = totalExams;
+  uniqueSubjectsElement.textContent = uniqueSubjects;
+  daysToNextElement.textContent = daysToNext;
+  completedExamsElement.textContent = completedExams;
+
+  if (NEXT_EXAM) {
+    nextExamTitle.textContent = daysToNext === 0 ? 'Your exam is TODAY!' :
+      daysToNext === 1 ? 'Your exam is TOMORROW!' : `Your next exam is in ${daysToNext} days`;
+    nextExamDetails.textContent = `${NEXT_EXAM.Subject} (${NEXT_EXAM.Board}) - ${formatDate(NEXT_EXAM.Date)}, ${NEXT_EXAM.Time || 'Time TBC'}`;
+    nextExamAlert.style.display = 'block';
+  } else {
+    nextExamAlert.style.display = 'none';
+  }
+}
       
       /**
        * Get the appropriate study activity based on subject and days until exam
@@ -1134,7 +1099,7 @@ document.addEventListener('DOMContentLoaded', function() {
             window.location.href = 'login.html';
             return;
           }
-          updateUserInfo('Valinor-70');
+          
           // Fetch the exam IDs the user is NOT doing (from the user_exams table)
           const { data: userExamsData, error: userExamsError } = await supabase
             .from('user_exams')
@@ -1279,11 +1244,18 @@ document.addEventListener('DOMContentLoaded', function() {
        */
       async function initialize() {
         try {
+          // Initialize the date time updater
           updateDateTime();
-          updateUserInfo('Valinor-70');
           TIMER_INTERVAL = setInterval(updateDateTime, 1000);
+          
+          // Load data
           await loadUserExams();
           await loadHardnessSettings();
+          
+          // Generate initial revision plan
+          await generateRevisionTimetable();
+          
+          // Remove loading overlay
           loadingOverlay.style.display = 'none';
         } catch (err) {
           console.error('Error initializing app:', err);
@@ -1291,23 +1263,45 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       }
       
+      // Fix tab switching
+      function setupTabSwitching() {
+        const tabLinks = document.querySelectorAll('[data-bs-toggle="tab"]');
+        tabLinks.forEach(tabLink => {
+          tabLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // Remove active class from all tabs and panes
+            document.querySelectorAll('.nav-link').forEach(tab => {
+              tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+              pane.classList.remove('show', 'active');
+            });
+            
+            // Add active class to clicked tab
+            tabLink.classList.add('active');
+            
+            // Add active class to corresponding pane
+            const targetSelector = tabLink.getAttribute('data-bs-target');
+            const targetPane = document.querySelector(targetSelector);
+            if (targetPane) {
+              targetPane.classList.add('show', 'active');
+            }
+          });
+        });
+      }
+      
       // Event listeners
       document.addEventListener('DOMContentLoaded', () => {
         initialize();
-        document.querySelectorAll('.nav-link').forEach(tab => {
-          tab.addEventListener('click', () => {
-            document.querySelectorAll('.nav-link').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('show', 'active'));
-            tab.classList.add('active');
-            const targetId = tab.getAttribute('data-bs-target').replace('#','');
-            document.getElementById(targetId).classList.add('show','active');
-          });
-        });
+        setupTabSwitching();
+        
         document.querySelectorAll('#select-exams-btn, #select-exams-btn-main').forEach(btn => {
           btn.addEventListener('click', () => {
             window.location.href = 'select-exams.html';
           });
         });
+        
         document.getElementById('logout-btn').addEventListener('click', async () => {
           try {
             await supabase.auth.signOut();
@@ -1317,11 +1311,11 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Error logging out. Please try again.');
           }
         });
+        
         document.getElementById('generate-revision-btn').addEventListener('click', generateRevisionTimetable);
       });
       
       window.updateHardness = updateHardness;
-      
     </script>
   </body>
 </html>
